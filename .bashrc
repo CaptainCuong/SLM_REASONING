@@ -90,6 +90,7 @@ alias cact='conda activate'
 alias tms='tmux ls'
 alias tma='tmux attach -t'
 alias tmn='tmux new -s'
+alias tmk='tmux kill-session -t'
 
 # Alias definitions.
 # You may want to put all your additions into a separate file like
