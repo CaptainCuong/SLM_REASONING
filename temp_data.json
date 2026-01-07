@@ -1,6 +1,0 @@
-[
-    {
-        "instruction": "Please reason step by step, and put your final answer within \\boxed{}.",
-        "input": "3. Given a convex quadrilateral $ABCD$ with area $P$. We extend side $AB$ beyond $B$ to $A_1$ such that $\\overline{AB}=\\overline{BA_1}$, then $BC$ beyond $C$ to $B_1$ such that $\\overline{BC}=\\overline{CB_1}$, then $CD$ beyond $D$ to $C_1$ so that $\\overline{CD}=\\overline{DC_1}$, and $DA$ beyond $A$ to $D_1$ such that $\\overline{DA}=\\overline{AD_1}$. What is the area of quadrilateral $A_1B_1C_1D_1$?"
-    }
-]
