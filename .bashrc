@@ -83,8 +83,13 @@ alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
 
-# Conda alias for quick activation
-alias cact='conda activate'
+########## CONDA ALIASES ##########
+# Add conda aliases
+alias cenv="conda env list"
+alias cinfo="conda info --envs"
+alias ccreate="conda create -n"
+alias cact="conda activate"
+alias cdeact="conda deactivate"
 
 # Tmux aliases for quick session management
 alias tms='tmux ls'
@@ -100,16 +105,6 @@ alias tmk='tmux kill-session -t'
 if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
 fi
-
-# enable programmable completion features (you don't need to enable
-# this, if it's already enabled in /etc/bash.bashrc and /etc/profile
-# sources /etc/bash.bashrc).
-#if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
-#    . /etc/bash_completion
-#fi
-cat /etc/runpod.txt
-echo -e "\nFor detailed documentation and guides, please visit:\n\033[1;34mhttps://docs.runpod.io/\033[0m and \033[1;34mhttps://blog.runpod.io/\033[0m\n\n"
-source /etc/rp_environment
 
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!

@@ -1,7 +1,4 @@
 {
-  "misc": {
-    "file_name": "math12K_10samples.json"
-  },
   "high_llh": {
     "file_name": "math12K_highest_likelihood.json"
   },
