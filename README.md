@@ -155,6 +155,27 @@ python prob_tracking/dynamics_utils/evaluate_all_checkpoints.py \
 }
 ```
 
+### 4. Visualize Training Dynamics
+
+Visualize how metrics evolve across checkpoints:
+
+```bash
+python temp/visualize_llh_dynamics.py \
+  --summary_path prob_tracking/results/Qwen_Math_high_all_checkpoints_summary.json \
+  --output_dir temp
+```
+
+**Options:**
+- `--plot_type all`: Generate both log-likelihood and perplexity plots (default)
+- `--plot_type llh`: Only log-likelihood plot
+- `--plot_type perplexity`: Only perplexity plot
+- `--no_show`: Save plots without displaying
+
+**Output:**
+- Summary statistics printed to console
+- PNG plots saved to output directory
+- All sample types plotted on single graph with legend
+
 ## Metrics
 
 - **Perplexity**: exp(-avg_log_likelihood). Lower = more confident
