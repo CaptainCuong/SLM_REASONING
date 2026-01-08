@@ -91,6 +91,57 @@ python utils/dataset/generate_solutions.py \
 - `--p`: Top-p (nucleus sampling) parameter
 - `--batch_size`: Limit number of samples to process
 
+### Count Checkpoint Accuracies
+
+Generate accuracy report for all checkpoints across all datasets:
+
+```bash
+python utils/eval/count_all_checkpoints.py \
+  --folder eval/outputs/model/Qwen_Math_high/ \
+  --output checkpoint_results.csv
+```
+
+**Options:**
+- `--folder`: Model folder containing checkpoint-* subfolders
+- `--output`: Output CSV filename (default: checkpoint_results.csv)
+- `--no-table`: Skip printing table to console
+
+**Output:**
+- CSV file with datasets as columns and checkpoints as rows
+- Accuracy percentages for each checkpoint-dataset combination
+- Weighted average (total correct / total questions)
+- Simple average (mean of accuracy percentages)
+- Console table showing all results
+
+### Compare Base vs Fine-tuned Results
+
+Identify samples that were fixed or broken by fine-tuning:
+
+```bash
+python temp/compare_eval_results.py \
+  --base_dir eval/outputs/Qwen/Qwen2.5-Math-7B/cn_math_2024 \
+  --finetuned_dir eval/outputs/model/Qwen_Math_high/checkpoint-555/cn_math_2024 \
+  --output_dir temp \
+  --output_name comparison_results.json
+```
+
+**Options:**
+- `--base_dir`: Directory with base model evaluation results
+- `--finetuned_dir`: Directory with fine-tuned model results
+- `--base_file`: Specific JSONL file for base model (optional, auto-detected)
+- `--finetuned_file`: Specific JSONL file for fine-tuned model (optional, auto-detected)
+- `--output_dir`: Directory to save comparison results
+- `--output_name`: Output filename
+
+**Output:**
+- Summary statistics showing accuracy improvement
+- Four categories:
+  - **Incorrect → Correct**: Fixed by fine-tuning
+  - **Correct → Incorrect**: Broken by fine-tuning
+  - **Stayed Correct**: Maintained performance
+  - **Stayed Incorrect**: Still needs improvement
+- Detailed JSON with all samples and predictions
+
 ## Log-Likelihood Dynamics Tracking
 
 Track how model metrics evolve across training checkpoints.

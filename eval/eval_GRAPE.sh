@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Base model directory
-base_model_dir="/workspace/model/Qwen_Math_low"
+base_model_dir="/helios-storage/helios3-data/cuong/model/Qwen_Math_high"
 
 # Array of datasets to evaluate
 datasets=("cn_math_2024" "gaokao" "grade_school_math" "kaoyan" "olympiadbench" "aime" "amc" "gpqa" "math" "minerva")
