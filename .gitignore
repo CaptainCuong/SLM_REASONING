@@ -2,3 +2,16 @@ temp_str
 
 # Large data files (over 100MB)
 data/math12K_merged_answers_with_Qwen2.5_Math_7B_loglikelihood.json
+temp/
+generated_solutions/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Evaluation outputs
+eval/outputs/
+eval/completions/

@@ -61,7 +61,7 @@ def prepare_prompts(data, tokenizer):
 
 
 def generate_solutions(json_file, model_name, output_dir, temperature=0.7,
-                       max_tokens=2048, batch_size=None, n_sampling=1):
+                       max_tokens=2048, batch_size=None, n_sampling=1, p=0.9):
     """
     Generate solutions for questions in a JSON file.
 
@@ -73,6 +73,7 @@ def generate_solutions(json_file, model_name, output_dir, temperature=0.7,
         max_tokens: Maximum tokens to generate
         batch_size: Number of samples to process (None = all)
         n_sampling: Number of solutions per question
+        p: Top-p (nucleus sampling) parameter (default: 0.9)
     """
     print(f"\n{'='*80}")
     print(f"Processing: {json_file}")
@@ -101,7 +102,7 @@ def generate_solutions(json_file, model_name, output_dir, temperature=0.7,
         temperature=temperature,
         max_tokens=max_tokens,
         n=n_sampling,
-        top_p=1.0 if temperature == 0 else 0.9
+        top_p=1.0 if temperature == 0 else p
     )
 
     print(f"\nSampling parameters:")
@@ -112,11 +113,15 @@ def generate_solutions(json_file, model_name, output_dir, temperature=0.7,
 
     # Initialize vLLM
     print(f"\nLoading model with vLLM...")
+    # Auto-detect number of available GPUs
+    num_gpus = int(os.environ.get('CUDA_VISIBLE_DEVICES', '0,1,2,3').count(',')) + 1 if 'CUDA_VISIBLE_DEVICES' in os.environ else len([f for f in os.listdir('/dev') if f.startswith('nvidia')]) if os.path.exists('/dev') else 1
+    print(f"  Using {num_gpus} GPU(s)")
+
     llm = LLM(
         model=model_name,
-        tensor_parallel_size=2,  # Adjust based on available GPUs
+        tensor_parallel_size=num_gpus,
         trust_remote_code=True,
-        gpu_memory_utilization=0.96
+        gpu_memory_utilization=0.5
     )
 
     # Generate solutions
@@ -176,8 +181,8 @@ def main():
     parser.add_argument(
         "--model_name",
         type=str,
-        default="Qwen/Qwen2.5-7B-Instruct",
-        help="Model name or path (default: Qwen/Qwen2.5-7B-Instruct)"
+        default="Qwen/Qwen2.5-Math-7B",
+        help="Model name or path (default: Qwen/Qwen2.5-Math-7B)"
     )
     parser.add_argument(
         "--output_dir",
@@ -210,6 +215,12 @@ def main():
         help="Number of solutions per question (default: 1)"
     )
     parser.add_argument(
+        "--p",
+        type=float,
+        default=0.9,
+        help="Top-p (nucleus sampling) parameter (default: 0.9)"
+    )
+    parser.add_argument(
         "--all",
         action="store_true",
         help="Process all JSON files in data folder (non-generated)"
@@ -238,7 +249,8 @@ def main():
                     temperature=args.temperature,
                     max_tokens=args.max_tokens,
                     batch_size=args.batch_size,
-                    n_sampling=args.n_sampling
+                    n_sampling=args.n_sampling,
+                    p=args.p
                 )
             except Exception as e:
                 print(f"\n✗ Error processing {json_file}: {e}")
@@ -252,7 +264,8 @@ def main():
             temperature=args.temperature,
             max_tokens=args.max_tokens,
             batch_size=args.batch_size,
-            n_sampling=args.n_sampling
+            n_sampling=args.n_sampling,
+            p=args.p
         )
 
 
