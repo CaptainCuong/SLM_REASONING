@@ -175,7 +175,8 @@ def calculate_response_metrics(
     tokenizer,
     instruction: str,
     response: str,
-    device: str = 'cuda' if torch.cuda.is_available() else 'cpu'
+    device: str = 'cuda' if torch.cuda.is_available() else 'cpu',
+    include_instruction: bool = False
 ) -> ResponseMetrics:
     """
     Calculate comprehensive metrics for a model response.
@@ -186,6 +187,8 @@ def calculate_response_metrics(
         instruction: The instruction/prompt text
         response: The response text to evaluate
         device: Device to run calculations on
+        include_instruction: If True, calculate metrics on the whole sequence (instruction + response).
+                           If False (default), calculate only on response tokens.
 
     Returns:
         ResponseMetrics object containing all calculated metrics
@@ -198,25 +201,42 @@ def calculate_response_metrics(
     # Move to device
     full_ids = full_ids.to(device)
 
-    # Get response token IDs (exclude instruction tokens)
-    response_start_idx = instruction_ids.shape[1]
-    response_ids = full_ids[:, response_start_idx:]
-
     # Get logits from model
     model.eval()
     with torch.no_grad():
         outputs = model(full_ids)
         logits = outputs.logits if hasattr(outputs, 'logits') else outputs[0]
 
-    # Extract logits for response tokens (shift by 1 for next token prediction)
-    response_logits = logits[:, response_start_idx-1:-1, :]
+    if include_instruction:
+        # Calculate metrics on the whole sequence (excluding the first token for prediction)
+        target_ids = full_ids[:, 1:]  # Shift by 1 for next token prediction
+        target_logits = logits[:, :-1, :]  # Corresponding logits
+
+        # Decode tokens for interpretability
+        target_tokens = [
+            tokenizer.decode([token_id])
+            for token_id in target_ids.squeeze().tolist()
+        ]
+    else:
+        # Calculate metrics only on response tokens (original behavior)
+        response_start_idx = instruction_ids.shape[1]
+        target_ids = full_ids[:, response_start_idx:]
+
+        # Extract logits for response tokens (shift by 1 for next token prediction)
+        target_logits = logits[:, response_start_idx-1:-1, :]
+
+        # Decode tokens for interpretability
+        target_tokens = [
+            tokenizer.decode([token_id])
+            for token_id in target_ids.squeeze().tolist()
+        ]
 
     # Calculate token probabilities
-    token_probs = calculate_token_probabilities(response_logits, response_ids)
+    token_probs = calculate_token_probabilities(target_logits, target_ids)
     token_log_probs = torch.log(token_probs + 1e-10)
 
     # Calculate entropies
-    token_entropies = calculate_entropy(response_logits, reduction='none')
+    token_entropies = calculate_entropy(target_logits, reduction='none')
 
     # Calculate aggregate metrics
     log_likelihood = token_log_probs.sum().item()
@@ -224,22 +244,16 @@ def calculate_response_metrics(
     perplexity = math.exp(-token_log_probs.mean().item())
     entropy = token_entropies.mean().item()
 
-    # Decode tokens for interpretability
-    response_tokens = [
-        tokenizer.decode([token_id])
-        for token_id in response_ids.squeeze().tolist()
-    ]
-
     return ResponseMetrics(
         perplexity=perplexity,
         log_likelihood=log_likelihood,
         average_token_prob=avg_token_prob,
         entropy=entropy,
-        token_count=response_ids.shape[1],
+        token_count=target_ids.shape[1],
         token_probs=token_probs.squeeze().tolist(),
         token_log_probs=token_log_probs.squeeze().tolist(),
         token_entropies=token_entropies.squeeze().tolist(),
-        tokens=response_tokens
+        tokens=target_tokens
     )
 
 

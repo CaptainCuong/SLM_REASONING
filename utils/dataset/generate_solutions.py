@@ -114,7 +114,8 @@ def generate_solutions(json_file, model_name, output_dir, temperature=0.7,
     # Initialize vLLM
     print(f"\nLoading model with vLLM...")
     # Auto-detect number of available GPUs
-    num_gpus = int(os.environ.get('CUDA_VISIBLE_DEVICES', '0,1,2,3').count(',')) + 1 if 'CUDA_VISIBLE_DEVICES' in os.environ else len([f for f in os.listdir('/dev') if f.startswith('nvidia')]) if os.path.exists('/dev') else 1
+    # num_gpus = int(os.environ.get('CUDA_VISIBLE_DEVICES', '0,1').count(',')) + 1 if 'CUDA_VISIBLE_DEVICES' in os.environ else len([f for f in os.listdir('/dev') if f.startswith('nvidia')]) if os.path.exists('/dev') else 1
+    num_gpus = 2
     print(f"  Using {num_gpus} GPU(s)")
 
     llm = LLM(
@@ -187,13 +188,13 @@ def main():
     parser.add_argument(
         "--output_dir",
         type=str,
-        default="./generated_solutions",
-        help="Output directory (default: ./generated_solutions)"
+        default="./temp",
+        help="Output directory (default: ./temp)"
     )
     parser.add_argument(
         "--temperature",
         type=float,
-        default=0.7,
+        default=0,
         help="Sampling temperature (default: 0.7, use 0 for greedy)"
     )
     parser.add_argument(
@@ -217,7 +218,7 @@ def main():
     parser.add_argument(
         "--p",
         type=float,
-        default=0.9,
+        default=1.0,
         help="Top-p (nucleus sampling) parameter (default: 0.9)"
     )
     parser.add_argument(

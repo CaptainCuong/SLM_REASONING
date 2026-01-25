@@ -1,4 +1,10 @@
 {
+  "high_llh_range_100_60": {
+    "file_name": "math12K_llh_range_100_60.json"
+  },
+  "high_llh_top1k": {
+    "file_name": "math12K_highest_likelihood_top1k.json"
+  },
   "high_llh": {
     "file_name": "math12K_highest_likelihood.json"
   },

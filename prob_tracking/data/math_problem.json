@@ -1,0 +1,8 @@
+[
+  {
+    "instruction": "Please reason step by step, and put your final answer within \\boxed{}.",
+    "input": "Flora the frog starts at 0 on the number line and makes a sequence of jumps to the right. In any one jump, independent of previous jumps, Flora leaps a positive integer distance $m$ with probability $\\frac{1}{2^m}$.\nWhat is the probability that Flora will eventually land at 10? Write the answer as a simplified fraction $\\frac{m}{n}$, find $m+n$",
+    "answer": 3.0,
+    "type" : "amc1"
+  }
+]

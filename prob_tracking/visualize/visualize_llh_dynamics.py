@@ -34,8 +34,17 @@ def plot_avg_log_likelihood(summary: dict, output_path: str = None, show: bool =
     # Create figure
     plt.figure(figsize=(12, 8))
 
-    # Plot each sample type
-    for sample_type, metrics in results_by_type.items():
+    # Generate distinct colors for each line
+    num_types = len(results_by_type)
+    colors = plt.cm.tab10(np.linspace(0, 1, min(num_types, 10)))
+
+    # If more than 10 types, use additional color maps
+    if num_types > 10:
+        colors = list(colors)
+        colors.extend(plt.cm.Set3(np.linspace(0, 1, num_types - 10)))
+
+    # Plot each sample type with a unique color
+    for idx, (sample_type, metrics) in enumerate(results_by_type.items()):
         avg_llh = metrics['avg_log_likelihood']
 
         # Filter out None values
@@ -44,7 +53,8 @@ def plot_avg_log_likelihood(summary: dict, output_path: str = None, show: bool =
         valid_llh = [avg_llh[i] for i in valid_indices]
 
         if valid_llh:
-            plt.plot(valid_steps, valid_llh, marker='o', label=sample_type, linewidth=2)
+            plt.plot(valid_steps, valid_llh, marker='o', label=sample_type,
+                    linewidth=2, color=colors[idx % len(colors)])
 
     plt.xlabel('Training Step', fontsize=12)
     plt.ylabel('Average Log-Likelihood', fontsize=12)
@@ -77,7 +87,17 @@ def plot_perplexity(summary: dict, output_path: str = None, show: bool = True):
 
     plt.figure(figsize=(12, 8))
 
-    for sample_type, metrics in results_by_type.items():
+    # Generate distinct colors for each line
+    num_types = len(results_by_type)
+    colors = plt.cm.tab10(np.linspace(0, 1, min(num_types, 10)))
+
+    # If more than 10 types, use additional color maps
+    if num_types > 10:
+        colors = list(colors)
+        colors.extend(plt.cm.Set3(np.linspace(0, 1, num_types - 10)))
+
+    # Plot each sample type with a unique color
+    for idx, (sample_type, metrics) in enumerate(results_by_type.items()):
         avg_ppl = metrics['avg_perplexity']
 
         # Filter out None values
@@ -86,7 +106,8 @@ def plot_perplexity(summary: dict, output_path: str = None, show: bool = True):
         valid_ppl = [avg_ppl[i] for i in valid_indices]
 
         if valid_ppl:
-            plt.plot(valid_steps, valid_ppl, marker='o', label=sample_type, linewidth=2)
+            plt.plot(valid_steps, valid_ppl, marker='o', label=sample_type,
+                    linewidth=2, color=colors[idx % len(colors)])
 
     plt.xlabel('Training Step', fontsize=12)
     plt.ylabel('Average Perplexity', fontsize=12)
@@ -148,7 +169,7 @@ def main():
     parser.add_argument(
         "--summary_path",
         type=str,
-        default="prob_tracking/results/Qwen_Math_high_all_checkpoints_summary.json",
+        default="prob_tracking/results/Qwen_Math_low_all_checkpoints_summary.json",
         help="Path to checkpoint summary JSON"
     )
     parser.add_argument(

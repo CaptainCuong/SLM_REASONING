@@ -5,10 +5,9 @@ Assumes folder structure: eval/outputs/workspace/model/Qwen_Math_high/<dataset_n
 """
 
 import json
-import os
+import csv
 import argparse
 from pathlib import Path
-from collections import defaultdict
 
 
 def load_jsonl(file_path):
@@ -137,32 +136,52 @@ def print_results_table(results):
     print("="*90)
 
     if len(results) > 1:
-        overall_accuracy = (correct_sum / total_sum * 100) if total_sum > 0 else 0
-        print(f"{'OVERALL':<25} {total_sum:<10} {correct_sum:<10} "
-              f"{total_sum - correct_sum:<12} {overall_accuracy:>8.2f}%")
+        # Weighted average (by total questions)
+        weighted_avg = (correct_sum / total_sum * 100) if total_sum > 0 else 0
+
+        # Simple average (average of all dataset accuracies)
+        simple_avg = sum(r['accuracy'] for r in results) / len(results) if results else 0
+
+        print(f"{'WEIGHTED AVERAGE':<25} {total_sum:<10} {correct_sum:<10} "
+              f"{total_sum - correct_sum:<12} {weighted_avg:>8.2f}%")
+        print(f"{'SIMPLE AVERAGE':<25} {'':<10} {'':<10} "
+              f"{'':<12} {simple_avg:>8.2f}%")
         print("="*90)
 
 
-def save_results_to_json(results, output_file):
-    """Save results to a JSON file."""
-    # Calculate overall statistics
+def save_results_to_csv(results, output_file):
+    """Save results to a CSV file."""
+    # Calculate statistics
     total_sum = sum(r['total'] for r in results)
     correct_sum = sum(r['correct'] for r in results)
-    overall_accuracy = (correct_sum / total_sum * 100) if total_sum > 0 else 0
+    weighted_avg = (correct_sum / total_sum * 100) if total_sum > 0 else 0
+    simple_avg = sum(r['accuracy'] for r in results) / len(results) if results else 0
 
-    output_data = {
-        'datasets': results,
-        'summary': {
-            'total_datasets': len(results),
-            'total_questions': total_sum,
-            'total_correct': correct_sum,
-            'total_incorrect': total_sum - correct_sum,
-            'overall_accuracy': overall_accuracy
-        }
-    }
+    with open(output_file, 'w', newline='', encoding='utf-8') as f:
+        writer = csv.writer(f)
 
-    with open(output_file, 'w', encoding='utf-8') as f:
-        json.dump(output_data, f, indent=2, ensure_ascii=False)
+        # Write header
+        writer.writerow(['Dataset', 'Total', 'Correct', 'Incorrect', 'Accuracy (%)'])
+
+        # Write dataset rows
+        for result in results:
+            writer.writerow([
+                result['dataset'],
+                result['total'],
+                result['correct'],
+                result['incorrect'],
+                f"{result['accuracy']:.2f}"
+            ])
+
+        # Write separator
+        writer.writerow([])
+
+        # Write summary statistics
+        writer.writerow(['Weighted Average', total_sum, correct_sum, total_sum - correct_sum, f"{weighted_avg:.2f}"])
+        writer.writerow(['Simple Average', '', '', '', f"{simple_avg:.2f}"])
+        writer.writerow([])
+        writer.writerow(['Total Datasets', len(results), '', '', ''])
+        writer.writerow(['Total Questions', total_sum, '', '', ''])
 
     print(f"\nResults saved to: {output_file}")
 
@@ -180,8 +199,8 @@ def main():
     parser.add_argument(
         "--output",
         type=str,
-        default="./results.json",
-        help="Optional JSON file to save results"
+        default="./results.csv",
+        help="CSV file to save results (default: ./results.csv)"
     )
 
     args = parser.parse_args()
@@ -197,9 +216,9 @@ def main():
     print(f"\nAnalyzing datasets in: {args.folder}")
     print_results_table(results)
 
-    # Save to JSON if requested
+    # Save to CSV
     if args.output:
-        save_results_to_json(results, args.output)
+        save_results_to_csv(results, args.output)
 
 
 if __name__ == "__main__":

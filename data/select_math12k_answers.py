@@ -258,8 +258,8 @@ if __name__ == "__main__":
     random.seed(42)
 
     # Configuration
-    input_file = "/workspace/SLM_REASONING/data/math12K_merged_answers_with_Qwen2.5_Math_7B_loglikelihood.json"
-    output_dir = "/workspace/SLM_REASONING/data"
+    input_file = "/home/cuongdc/SLM_REASONING/data/math12K_merged_answers_with_Qwen2.5_Math_7B_loglikelihood.json"
+    output_dir = "/home/cuongdc/SLM_REASONING/data"
 
     output_highest = f"{output_dir}/math12K_highest_likelihood.json"
     output_lowest = f"{output_dir}/math12K_lowest_likelihood.json"

@@ -9,7 +9,7 @@ from .calculate_llh import (
     save_results
 )
 
-from .evaluate_all_checkpoints import (
+from .evaluate_llh_all_checkpoints import (
     find_checkpoints,
     aggregate_metrics_by_type,
     evaluate_all_checkpoints
@@ -22,5 +22,5 @@ __all__ = [
     'save_results',
     'find_checkpoints',
     'aggregate_metrics_by_type',
-    'evaluate_all_checkpoints'
+    'evaluate_llh_all_checkpoints'
 ]

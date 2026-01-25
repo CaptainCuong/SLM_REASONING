@@ -17,7 +17,7 @@ preprocessing_num_workers: 64
 template: qwen
 
 ### output
-output_dir: /helios-storage/helios3-data/cuong/model/Qwen_Math_high
+output_dir: /projects/ai_safe/cuongdc/Qwen_Math_high
 logging_steps: 1
 save_strategy: steps
 save_steps: 555
@@ -25,9 +25,9 @@ plot_loss: true
 overwrite_output_dir: true
 
 ### train
-per_device_train_batch_size: 1
+per_device_train_batch_size: 2
 gradient_accumulation_steps: 1
-learning_rate: 5e-5
+learning_rate: 5e-6
 num_train_epochs: 5
 lr_scheduler_type: cosine
 warmup_ratio: 0.0

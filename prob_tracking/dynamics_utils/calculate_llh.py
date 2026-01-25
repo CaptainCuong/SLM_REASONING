@@ -77,7 +77,8 @@ def calculate_metrics_for_pool(
     model,
     tokenizer,
     pool_data: List[Dict[str, Any]],
-    device: str
+    device: str,
+    include_instruction: bool = False
 ) -> List[Dict[str, Any]]:
     """
     Calculate metrics for all samples in the pool.
@@ -87,6 +88,8 @@ def calculate_metrics_for_pool(
         tokenizer: The tokenizer
         pool_data: List of sample dictionaries with 'instruction', 'input', 'output', 'type'
         device: Device to run calculations on
+        include_instruction: If True, calculate metrics on the whole sequence (prompt + output).
+                           If False (default), calculate only on output tokens.
 
     Returns:
         List of dictionaries containing type and metrics for each sample
@@ -116,7 +119,8 @@ def calculate_metrics_for_pool(
             tokenizer=tokenizer,
             instruction=prompt,
             response=output_text,
-            device=device
+            device=device,
+            include_instruction=include_instruction
         )
 
         # Create result entry
@@ -178,6 +182,12 @@ def main():
         default=None,
         help="Device to use (cuda/cpu, default: auto-detect)"
     )
+    parser.add_argument(
+        "--include_instruction",
+        action="store_true",
+        help="If set, calculate log-likelihood on the whole sequence (instruction + input + output). "
+             "By default, only calculates on output tokens."
+    )
 
     args = parser.parse_args()
 
@@ -190,8 +200,9 @@ def main():
     print(f"Loaded {len(pool_data)} samples")
 
     # Calculate metrics
-    print("\nCalculating metrics for all samples...")
-    results = calculate_metrics_for_pool(model, tokenizer, pool_data, device)
+    mode_str = "whole sequence (prompt + output)" if args.include_instruction else "output tokens only"
+    print(f"\nCalculating metrics for all samples (mode: {mode_str})...")
+    results = calculate_metrics_for_pool(model, tokenizer, pool_data, device, args.include_instruction)
 
     # Determine output path
     if args.output_path is None:

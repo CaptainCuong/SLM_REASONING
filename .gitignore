@@ -18,3 +18,10 @@ eval/completions/
 
 # Image outputs
 prob_tracking/image/
+
+#
+prob_tracking/results/
+
+# Data files
+**.csv
+**.pkl
