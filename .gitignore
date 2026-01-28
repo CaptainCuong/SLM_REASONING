@@ -13,7 +13,6 @@ __pycache__/
 .Python
 
 # Evaluation outputs
-eval/outputs/
 eval/completions/
 
 # Image outputs
