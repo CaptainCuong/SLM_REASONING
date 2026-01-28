@@ -315,6 +315,12 @@ def main():
         default='all',
         help="Type of plot to generate (default: all)"
     )
+    parser.add_argument(
+        "--questions",
+        type=str,
+        default=None,
+        help="Comma-separated list of question IDs to visualize (e.g., '1,2,3'). If not specified, visualize all questions."
+    )
 
     args = parser.parse_args()
 
@@ -329,6 +335,23 @@ def main():
     # Organize by question
     questions = organize_by_question(results['summary_by_type'])
     print(f"Found {len(questions)} unique questions")
+
+    # Filter questions if specified
+    if args.questions is not None:
+        requested_ids = [int(q.strip()) for q in args.questions.split(',')]
+        available_ids = set(questions.keys())
+
+        # Check for non-existent questions
+        missing_ids = [q_id for q_id in requested_ids if q_id not in available_ids]
+        if missing_ids:
+            raise ValueError(
+                f"Question ID(s) {missing_ids} do not exist. "
+                f"Available question IDs: {sorted(available_ids)}"
+            )
+
+        # Filter to only requested questions
+        questions = {q_id: questions[q_id] for q_id in requested_ids}
+        print(f"Visualizing {len(questions)} selected question(s): {requested_ids}")
 
     # Create output directory
     Path(args.output_dir).mkdir(parents=True, exist_ok=True)
