@@ -6,12 +6,14 @@ This script processes all checkpoints in a model folder, calculates metrics for 
 and outputs lists of perplexity and log-likelihood values across training.
 """
 
+import gc
 import json
 import os
 import argparse
 from pathlib import Path
 from typing import List, Dict, Any, Tuple
 import re
+import torch
 from tqdm import tqdm
 
 from calculate_llh import (
@@ -134,9 +136,9 @@ def evaluate_all_checkpoints(
     # Clean up model to free memory
     del model
     del tokenizer
-    import torch
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
+    gc.collect()
 
     print(f"✓ Completed base model evaluation")
 
@@ -178,9 +180,9 @@ def evaluate_all_checkpoints(
         # Clean up model to free memory
         del model
         del tokenizer
-        import torch
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
+        gc.collect()
 
         print(f"✓ Completed checkpoint-{step_num}")
 
@@ -243,7 +245,7 @@ def evaluate_all_checkpoints(
     # Save results
     if output_path is None:
         model_name = Path(model_folder).name
-        output_path = f"prob_tracking/results/{model_name}_all_checkpoints_summary.json"
+        output_path = f"./prob_tracking/results/{model_name}_all_checkpoints_summary.json"
 
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
@@ -281,19 +283,19 @@ def main():
         "--model_folder",
         type=str,
         required=True,
-        help="Path to model folder containing checkpoints (e.g., /projects/ai_safe/cuongdc/Qwen_Math_low/)"
+        help="Path to model folder containing checkpoints (e.g., /projects/ai_safe/cuongdc/Qwen_Math_high/)"
     )
     parser.add_argument(
         "--pool_path",
         type=str,
-        default="prob_tracking/data/traceback_pool_low.json",
-        help="Path to pool.json file (default: prob_tracking/data/traceback_pool_low.json)"
+        default="./prob_tracking/data/test_high.json",
+        help="Path to pool.json file (default: ./prob_tracking/data/test_high.json)"
     )
     parser.add_argument(
         "--output_path",
         type=str,
         default=None,
-        help="Path to save output JSON (default: prob_tracking/results/<model_name>_all_checkpoints_summary.json)"
+        help="Path to save output JSON (default: ./prob_tracking/results/<model_name>_all_checkpoints_summary.json)"
     )
     parser.add_argument(
         "--device",

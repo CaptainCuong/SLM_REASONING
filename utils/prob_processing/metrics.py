@@ -244,15 +244,27 @@ def calculate_response_metrics(
     perplexity = math.exp(-token_log_probs.mean().item())
     entropy = token_entropies.mean().item()
 
+    # Store values before cleanup
+    token_count = target_ids.shape[1]
+    token_probs_list = token_probs.squeeze().tolist()
+    token_log_probs_list = token_log_probs.squeeze().tolist()
+    token_entropies_list = token_entropies.squeeze().tolist()
+
+    # Clean up tensors to prevent memory leak
+    del instruction_ids, full_ids, outputs, logits, target_ids, target_logits
+    del token_probs, token_log_probs, token_entropies
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+
     return ResponseMetrics(
         perplexity=perplexity,
         log_likelihood=log_likelihood,
         average_token_prob=avg_token_prob,
         entropy=entropy,
-        token_count=target_ids.shape[1],
-        token_probs=token_probs.squeeze().tolist(),
-        token_log_probs=token_log_probs.squeeze().tolist(),
-        token_entropies=token_entropies.squeeze().tolist(),
+        token_count=token_count,
+        token_probs=token_probs_list,
+        token_log_probs=token_log_probs_list,
+        token_entropies=token_entropies_list,
         tokens=target_tokens
     )
 

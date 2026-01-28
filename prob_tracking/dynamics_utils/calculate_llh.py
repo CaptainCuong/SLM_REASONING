@@ -6,6 +6,7 @@ This script loads a model checkpoint and calculates comprehensive metrics includ
 log-likelihood, perplexity, entropy, and token probabilities for each sample in the pool.
 """
 
+import gc
 import json
 import os
 import argparse
@@ -235,6 +236,13 @@ def main():
         print(f"\nType: {sample_type} (n={len(metrics_list)})")
         print(f"  Average Log-Likelihood: {avg_log_likelihood:.4f}")
         print(f"  Average Perplexity: {avg_perplexity:.4f}")
+
+    # Clean up model and tokenizer to release memory
+    del model
+    del tokenizer
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+    gc.collect()
 
     print("\n" + "="*80)
 

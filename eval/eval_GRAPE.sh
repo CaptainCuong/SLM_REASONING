@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Base model directory
-# base_model_dir="/projects/ai_safe/cuongdc/Qwen_Math_high"
+# base_model_dir="/projects/ai_safe/cuongdc/Qwen_Math_low"
 base_model_dir="Qwen/Qwen2.5-Math-7B"
 
 # Array of datasets to evaluate

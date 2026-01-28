@@ -205,13 +205,13 @@ def main():
     parser.add_argument(
         "--dir1",
         type=str,
-        default="eval/outputs/cuongdc/Qwen_Math_high/checkpoint-555/amc/",
+        default="eval/outputs/Qwen/Qwen2.5-Math-7B/amc/",
         help="Directory containing first model results (default: checkpoint-555/amc)"
     )
     parser.add_argument(
         "--dir2",
         type=str,
-        default="eval/outputs/cuongdc/Qwen_Math_high/checkpoint-1110/amc/",
+        default="eval/outputs/cuongdc/Qwen_Math_high/checkpoint-555/amc/",
         help="Directory containing second model results (default: checkpoint-1110/amc)"
     )
     parser.add_argument(

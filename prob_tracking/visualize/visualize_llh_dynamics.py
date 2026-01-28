@@ -169,7 +169,7 @@ def main():
     parser.add_argument(
         "--summary_path",
         type=str,
-        default="prob_tracking/results/Qwen_Math_low_all_checkpoints_summary.json",
+        default="prob_tracking/results/Qwen_Math_high_all_checkpoints_summary.json",
         help="Path to checkpoint summary JSON"
     )
     parser.add_argument(
