@@ -110,7 +110,7 @@ def main():
     parser.add_argument(
         "--model",
         type=str,
-        default="Qwen/Qwen2.5-Math-7B",
+        default="Qwen/Qwen2.5-7B-Instruct",
         help="Model name or path for paraphrasing"
     )
     parser.add_argument(
