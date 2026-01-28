@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """
-Calculate gradient norm of an LLM model on given samples.
+Calculate loss of an LLM model on given samples.
 
-This script loads a model and calculates the gradient norm (L2 norm of all parameter gradients)
-for each sample or batch of samples.
+This script loads a model and calculates the loss for each sample.
 """
 
 import gc
@@ -97,67 +96,14 @@ def load_model_and_tokenizer(
     if device != 'cuda':
         model = model.to(device)
 
-    # Enable gradients for training
-    model.train()
+    # Set to eval mode (no gradients needed)
+    model.eval()
     print(f"Model loaded on {device}")
 
     return model, tokenizer, device
 
 
-def compute_gradient_norm(model: nn.Module) -> Dict[str, float]:
-    """
-    Compute the gradient norm of all model parameters.
-
-    Args:
-        model: The neural network model with computed gradients
-
-    Returns:
-        Dictionary containing various gradient norm statistics
-    """
-    total_norm = 0.0
-    param_norms = []
-    num_params_with_grad = 0
-
-    for name, param in model.named_parameters():
-        if param.grad is not None:
-            param_norm = param.grad.data.norm(2).item()
-            total_norm += param_norm ** 2
-            param_norms.append(param_norm)
-            num_params_with_grad += 1
-
-    total_norm = np.sqrt(total_norm)
-
-    result = {
-        'total_gradient_norm': total_norm,
-        'num_params_with_grad': num_params_with_grad,
-        'mean_param_norm': np.mean(param_norms) if param_norms else 0.0,
-        'max_param_norm': np.max(param_norms) if param_norms else 0.0,
-        'min_param_norm': np.min(param_norms) if param_norms else 0.0,
-    }
-
-    return result
-
-
-def compute_layerwise_gradient_norm(model: nn.Module) -> Dict[str, float]:
-    """
-    Compute gradient norms for each layer/module.
-
-    Args:
-        model: The neural network model with computed gradients
-
-    Returns:
-        Dictionary mapping layer names to their gradient norms
-    """
-    layer_norms = {}
-
-    for name, param in model.named_parameters():
-        if param.grad is not None:
-            layer_norms[name] = param.grad.data.norm(2).item()
-
-    return layer_norms
-
-
-def calculate_gradient_norm_for_sample(
+def calculate_loss_for_sample(
     model: nn.Module,
     tokenizer: Any,
     prompt: str,
@@ -166,7 +112,7 @@ def calculate_gradient_norm_for_sample(
     max_length: int = 32768
 ) -> Dict[str, Any]:
     """
-    Calculate gradient norm for a single sample (prompt + response).
+    Calculate loss for a single sample (prompt + response).
 
     Args:
         model: The language model
@@ -177,7 +123,7 @@ def calculate_gradient_norm_for_sample(
         max_length: Maximum sequence length
 
     Returns:
-        Dictionary containing gradient norm statistics
+        Dictionary containing loss statistics
     """
     # Tokenize the full sequence
     full_text = prompt + response
@@ -206,45 +152,39 @@ def calculate_gradient_norm_for_sample(
     labels = input_ids.clone()
     labels[0, :prompt_length] = -100  # Mask prompt tokens
 
-    # Zero gradients
-    model.zero_grad()
-
-    # Forward pass with labels to get loss
-    outputs = model(
-        input_ids=input_ids,
-        attention_mask=attention_mask,
-        labels=labels
-    )
+    # Forward pass with labels to get loss (no gradient computation needed)
+    with torch.no_grad():
+        outputs = model(
+            input_ids=input_ids,
+            attention_mask=attention_mask,
+            labels=labels
+        )
 
     loss = outputs.loss
 
-    # Backward pass
-    loss.backward()
-
-    # Compute gradient norms
-    grad_norms = compute_gradient_norm(model)
-    grad_norms['loss'] = loss.item()
-    grad_norms['sequence_length'] = input_ids.shape[1]
-    grad_norms['response_length'] = input_ids.shape[1] - prompt_length
+    result = {
+        'loss': loss.item(),
+        'sequence_length': input_ids.shape[1],
+        'response_length': input_ids.shape[1] - prompt_length
+    }
 
     # Clean up to prevent memory leak
     del inputs, input_ids, attention_mask, prompt_tokens, labels, outputs, loss
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
 
-    return grad_norms
+    return result
 
 
-def calculate_gradient_norms_for_pool(
+def calculate_loss_for_pool(
     model: nn.Module,
     tokenizer: Any,
     pool_data: List[Dict[str, Any]],
     device: str,
-    max_length: int = 32768,
-    compute_layerwise: bool = False
+    max_length: int = 32768
 ) -> List[Dict[str, Any]]:
     """
-    Calculate gradient norms for all samples in a pool.
+    Calculate loss for all samples in a pool.
 
     Args:
         model: The language model
@@ -252,14 +192,13 @@ def calculate_gradient_norms_for_pool(
         pool_data: List of sample dictionaries with 'instruction', 'input', 'output', 'type'
         device: Device to run on
         max_length: Maximum sequence length
-        compute_layerwise: Whether to compute per-layer gradient norms
 
     Returns:
-        List of dictionaries containing gradient norm statistics for each sample
+        List of dictionaries containing loss statistics for each sample
     """
     results = []
 
-    for sample in tqdm(pool_data, desc="Calculating gradient norms"):
+    for sample in tqdm(pool_data, desc="Calculating losses"):
         # Extract fields
         instruction = sample.get('instruction', '')
         input_text = sample.get('input', '')
@@ -269,8 +208,8 @@ def calculate_gradient_norms_for_pool(
         # Prepare prompt using chat template
         prompt = prepare_prompt(instruction, input_text, tokenizer)
 
-        # Calculate gradient norms
-        grad_norms = calculate_gradient_norm_for_sample(
+        # Calculate loss
+        loss_result = calculate_loss_for_sample(
             model=model,
             tokenizer=tokenizer,
             prompt=prompt,
@@ -281,12 +220,8 @@ def calculate_gradient_norms_for_pool(
 
         result = {
             'type': sample_type,
-            'gradient_norms': grad_norms
+            'loss_stats': loss_result
         }
-
-        # Optionally compute layerwise norms
-        if compute_layerwise:
-            result['layerwise_norms'] = compute_layerwise_gradient_norm(model)
 
         results.append(result)
 
@@ -309,39 +244,32 @@ def save_results(results: Dict[str, Any], output_path: str):
 
 
 def aggregate_results_by_type(results: List[Dict[str, Any]]) -> Dict[str, Dict[str, float]]:
-    """Aggregate gradient norm statistics by sample type."""
+    """Aggregate loss statistics by sample type."""
     type_stats = {}
 
     for result in results:
         sample_type = result['type']
         if sample_type not in type_stats:
             type_stats[sample_type] = {
-                'gradient_norms': [],
                 'losses': [],
                 'count': 0
             }
 
-        type_stats[sample_type]['gradient_norms'].append(
-            result['gradient_norms']['total_gradient_norm']
-        )
         type_stats[sample_type]['losses'].append(
-            result['gradient_norms']['loss']
+            result['loss_stats']['loss']
         )
         type_stats[sample_type]['count'] += 1
 
     # Calculate summary statistics
     summary = {}
     for sample_type, stats in type_stats.items():
-        norms = stats['gradient_norms']
         losses = stats['losses']
         summary[sample_type] = {
             'count': stats['count'],
-            'avg_gradient_norm': np.mean(norms),
-            'std_gradient_norm': np.std(norms),
-            'min_gradient_norm': np.min(norms),
-            'max_gradient_norm': np.max(norms),
             'avg_loss': np.mean(losses),
-            'std_loss': np.std(losses)
+            'std_loss': np.std(losses),
+            'min_loss': np.min(losses),
+            'max_loss': np.max(losses)
         }
 
     return summary
@@ -349,7 +277,7 @@ def aggregate_results_by_type(results: List[Dict[str, Any]]) -> Dict[str, Dict[s
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Calculate gradient norms for an LLM on pool samples"
+        description="Calculate loss for an LLM on pool samples"
     )
     parser.add_argument(
         "--model_name_or_path",
@@ -366,8 +294,8 @@ def main():
     parser.add_argument(
         "--output_path",
         type=str,
-        default="ntk/results/gradient_norms.json",
-        help="Path to save output JSON (default: ntk/results/gradient_norms.json)"
+        default="ntk/results/losses.json",
+        help="Path to save output JSON (default: ntk/results/losses.json)"
     )
     parser.add_argument(
         "--device",
@@ -381,16 +309,11 @@ def main():
         default=32768,
         help="Maximum sequence length (default: 32768)"
     )
-    parser.add_argument(
-        "--layerwise",
-        action="store_true",
-        help="Compute per-layer gradient norms (increases output size)"
-    )
 
     args = parser.parse_args()
 
     print("=" * 80)
-    print("GRADIENT NORM CALCULATION")
+    print("LOSS CALCULATION")
     print("=" * 80)
     print(f"\nModel: {args.model_name_or_path}")
 
@@ -405,15 +328,14 @@ def main():
     pool_data = load_pool_data(args.pool_path)
     print(f"Loaded {len(pool_data)} samples")
 
-    # Calculate gradient norms for all samples
-    print("\nCalculating gradient norms...")
-    results = calculate_gradient_norms_for_pool(
+    # Calculate loss for all samples
+    print("\nCalculating losses...")
+    results = calculate_loss_for_pool(
         model=model,
         tokenizer=tokenizer,
         pool_data=pool_data,
         device=device,
-        max_length=args.max_length,
-        compute_layerwise=args.layerwise
+        max_length=args.max_length
     )
 
     # Aggregate results
@@ -425,7 +347,6 @@ def main():
     print("=" * 80)
     for sample_type, stats in sorted(summary.items()):
         print(f"\nType: {sample_type} (n={stats['count']})")
-        print(f"  Gradient Norm: {stats['avg_gradient_norm']:.6f} ± {stats['std_gradient_norm']:.6f}")
         print(f"  Loss: {stats['avg_loss']:.6f} ± {stats['std_loss']:.6f}")
 
     # Prepare output

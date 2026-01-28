@@ -87,8 +87,8 @@ def load_correctness_data(
 
     if base_file:
         base_entries = load_jsonl(base_file)
-        for entry in base_entries:
-            q_id = str(entry.get('id', ''))
+        for idx, entry in enumerate(base_entries, start=1):
+            q_id = str(idx)  # Use reading order as ID, starting from 1
             base_correctness[q_id] = entry.get('is_correct', False)
         print(f"Loaded {len(base_correctness)} questions from base model")
     else:
@@ -104,8 +104,8 @@ def load_correctness_data(
         if cp_file:
             entries = load_jsonl(cp_file)
             cp_correct = {}
-            for entry in entries:
-                q_id = str(entry.get('id', ''))
+            for idx, entry in enumerate(entries, start=1):
+                q_id = str(idx)  # Use reading order as ID, starting from 1
                 cp_correct[q_id] = entry.get('is_correct', False)
             checkpoint_correctness[step] = cp_correct
             steps.append(step)
