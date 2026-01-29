@@ -177,12 +177,11 @@ def process_dataset(
 ) -> List[Dict[str, Any]]:
     """
     Process all questions and answers in the dataset.
+    Adds gradient_norm and loss directly into each answer object.
     """
-    results = []
-
     questions_to_process = data[:max_questions] if max_questions else data
 
-    for q_idx, question_item in enumerate(tqdm(questions_to_process, desc="Processing questions")):
+    for question_item in tqdm(questions_to_process, desc="Processing questions"):
         question = question_item['question']
         answers = question_item['answers']
 
@@ -192,50 +191,28 @@ def process_dataset(
         # Limit answers if specified
         answers_to_process = answers[:max_answers_per_question] if max_answers_per_question else answers
 
-        question_results = {
-            'question_idx': q_idx,
-            'question': question[:200] + '...' if len(question) > 200 else question,
-            'num_answers': len(answers_to_process),
-            'answers': []
-        }
-
-        for ans_idx, answer_item in enumerate(answers_to_process):
+        for answer_item in answers_to_process:
             answer_text = answer_item.get('answer', '')
-            source = answer_item.get('source', 'unknown')
-            log_likelihood = answer_item.get('log_likelihood')
 
-            # Skip if answer is empty or has invalid log_likelihood
+            # Skip if answer is empty
             if not answer_text:
                 continue
 
-            try:
-                grad_result = calculate_gradient_norm_for_sample(
-                    model=model,
-                    tokenizer=tokenizer,
-                    prompt=prompt,
-                    response=answer_text,
-                    device=device,
-                    max_length=max_length
-                )
+            grad_result = calculate_gradient_norm_for_sample(
+                model=model,
+                tokenizer=tokenizer,
+                prompt=prompt,
+                response=answer_text,
+                device=device,
+                max_length=max_length
+            )
 
-                answer_result = {
-                    'answer_idx': ans_idx,
-                    'source': source,
-                    'log_likelihood': log_likelihood,
-                    'loss': grad_result['loss'],
-                    'gradient_norm': grad_result['gradient_norm'],
-                    'response_length': grad_result['response_length']
-                }
+            # Add gradient norm info directly into the answer object
+            answer_item['loss'] = grad_result['loss']
+            answer_item['gradient_norm'] = grad_result['gradient_norm']
+            answer_item['response_length'] = grad_result['response_length']
 
-                question_results['answers'].append(answer_result)
-
-            except Exception as e:
-                print(f"\nError processing question {q_idx}, answer {ans_idx}: {e}")
-                continue
-
-        results.append(question_results)
-
-    return results
+    return data
 
 
 def save_results(results: Dict[str, Any], output_path: str):
@@ -244,62 +221,6 @@ def save_results(results: Dict[str, Any], output_path: str):
     with open(output_path, 'w', encoding='utf-8') as f:
         json.dump(results, f, indent=2, ensure_ascii=False)
     print(f"\nResults saved to {output_path}")
-
-
-def compute_summary_statistics(results: List[Dict[str, Any]]) -> Dict[str, Any]:
-    """Compute summary statistics from results."""
-    all_losses = []
-    all_grad_norms = []
-    source_stats = {}
-
-    for q_result in results:
-        for ans in q_result['answers']:
-            loss = ans['loss']
-            grad_norm = ans['gradient_norm']
-            source = ans['source']
-
-            all_losses.append(loss)
-            all_grad_norms.append(grad_norm)
-
-            if source not in source_stats:
-                source_stats[source] = {'losses': [], 'grad_norms': []}
-            source_stats[source]['losses'].append(loss)
-            source_stats[source]['grad_norms'].append(grad_norm)
-
-    summary = {
-        'total_answers': len(all_losses),
-        'total_questions': len(results),
-        'overall': {
-            'loss': {
-                'mean': float(np.mean(all_losses)) if all_losses else 0,
-                'std': float(np.std(all_losses)) if all_losses else 0,
-                'min': float(np.min(all_losses)) if all_losses else 0,
-                'max': float(np.max(all_losses)) if all_losses else 0
-            },
-            'gradient_norm': {
-                'mean': float(np.mean(all_grad_norms)) if all_grad_norms else 0,
-                'std': float(np.std(all_grad_norms)) if all_grad_norms else 0,
-                'min': float(np.min(all_grad_norms)) if all_grad_norms else 0,
-                'max': float(np.max(all_grad_norms)) if all_grad_norms else 0
-            }
-        },
-        'by_source': {}
-    }
-
-    for source, stats in source_stats.items():
-        summary['by_source'][source] = {
-            'count': len(stats['losses']),
-            'loss': {
-                'mean': float(np.mean(stats['losses'])),
-                'std': float(np.std(stats['losses']))
-            },
-            'gradient_norm': {
-                'mean': float(np.mean(stats['grad_norms'])),
-                'std': float(np.std(stats['grad_norms']))
-            }
-        }
-
-    return summary
 
 
 def main():
@@ -315,7 +236,7 @@ def main():
     parser.add_argument(
         "--input_path",
         type=str,
-        default="/home/cuongdc/SLM_REASONING/data/math12K_merged_answers_with_Qwen2.5_Math_7B_loglikelihood.json",
+        default="data/math12K_merged_answers_with_Qwen2.5_Math_7B_loglikelihood.json",
         help="Path to input JSON file with questions and answers"
     )
     parser.add_argument(
@@ -370,9 +291,9 @@ def main():
         data = json.load(f)
     print(f"Loaded {len(data)} questions")
 
-    # Process dataset
+    # Process dataset - this modifies data in-place
     print("\nCalculating gradient norms...")
-    results = process_dataset(
+    updated_data = process_dataset(
         model=model,
         tokenizer=tokenizer,
         data=data,
@@ -382,34 +303,43 @@ def main():
         max_answers_per_question=args.max_answers
     )
 
-    # Compute summary
-    summary = compute_summary_statistics(results)
+    # Compute and print summary statistics
+    all_losses = []
+    all_grad_norms = []
+    source_stats = {}
 
-    # Print summary
+    for question_item in updated_data:
+        for ans in question_item.get('answers', []):
+            if 'gradient_norm' in ans:
+                loss = ans['loss']
+                grad_norm = ans['gradient_norm']
+                source = ans.get('source', 'unknown')
+
+                all_losses.append(loss)
+                all_grad_norms.append(grad_norm)
+
+                if source not in source_stats:
+                    source_stats[source] = {'losses': [], 'grad_norms': []}
+                source_stats[source]['losses'].append(loss)
+                source_stats[source]['grad_norms'].append(grad_norm)
+
     print("\n" + "=" * 80)
     print("Summary Statistics:")
     print("=" * 80)
-    print(f"Total questions: {summary['total_questions']}")
-    print(f"Total answers: {summary['total_answers']}")
-    print(f"\nOverall Loss: {summary['overall']['loss']['mean']:.4f} ± {summary['overall']['loss']['std']:.4f}")
-    print(f"Overall Gradient Norm: {summary['overall']['gradient_norm']['mean']:.4f} ± {summary['overall']['gradient_norm']['std']:.4f}")
+    print(f"Total questions: {len(updated_data)}")
+    print(f"Total answers processed: {len(all_losses)}")
+    if all_losses:
+        print(f"\nOverall Loss: {np.mean(all_losses):.4f} ± {np.std(all_losses):.4f}")
+        print(f"Overall Gradient Norm: {np.mean(all_grad_norms):.4f} ± {np.std(all_grad_norms):.4f}")
 
-    print("\nBy Source:")
-    for source, stats in summary['by_source'].items():
-        print(f"  {source} (n={stats['count']})")
-        print(f"    Loss: {stats['loss']['mean']:.4f} ± {stats['loss']['std']:.4f}")
-        print(f"    Gradient Norm: {stats['gradient_norm']['mean']:.4f} ± {stats['gradient_norm']['std']:.4f}")
+        print("\nBy Source:")
+        for source, stats in source_stats.items():
+            print(f"  {source} (n={len(stats['losses'])})")
+            print(f"    Loss: {np.mean(stats['losses']):.4f} ± {np.std(stats['losses']):.4f}")
+            print(f"    Gradient Norm: {np.mean(stats['grad_norms']):.4f} ± {np.std(stats['grad_norms']):.4f}")
 
-    # Prepare output
-    output_data = {
-        'model_path': args.model_name_or_path,
-        'input_path': args.input_path,
-        'summary': summary,
-        'results': results
-    }
-
-    # Save results
-    save_results(output_data, args.output_path)
+    # Save updated data with gradient norms added to each answer
+    save_results(updated_data, args.output_path)
 
     # Clean up
     del model
