@@ -1,4 +1,10 @@
 {
+  "high_grad_norm": {
+    "file_name": "math12K_highest_gradient_norm.json"
+  },
+  "low_grad_norm": {
+    "file_name": "math12K_lowest_gradient_norm.json"
+  },
   "high_llh_range_100_60": {
     "file_name": "math12K_llh_range_100_60.json"
   },
