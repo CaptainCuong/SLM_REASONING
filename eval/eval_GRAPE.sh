@@ -1,12 +1,11 @@
 #!/bin/bash
 
 # Base model directory
-base_model_dir="/helios-storage/helios4-data/cuong/model/Qwen_Math_low_grad_norm/"
+base_model_dir="/projects/ai_safe/cuongdc/Qwen_Math_high_grad_norm"
 # base_model_dir="Qwen/Qwen2.5-Math-7B"
 
 # Array of datasets to evaluate
-# datasets=("math12k" "cn_math_2024" "gaokao" "grade_school_math" "kaoyan" "olympiadbench" "aime" "amc" "gpqa" "math" "minerva")
-datasets=("math12k")
+datasets=("math12k" "cn_math_2024" "gaokao" "grade_school_math" "kaoyan" "olympiadbench" "aime" "amc" "gpqa" "math" "minerva")
 
 # Create array of all model paths to evaluate (base model + all checkpoints)
 model_paths=("$base_model_dir")
