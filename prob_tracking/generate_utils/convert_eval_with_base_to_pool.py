@@ -418,7 +418,7 @@ Examples:
         '--model_dir',
         type=str,
         required=True,
-        help='Directory containing checkpoint subdirectories (e.g., 6ongdc/Qwen_Math_high)'
+        help='Directory containing checkpoint subdirectories (e.g., eval/outputs/cuongdc/Qwen_Math_high)'
     )
 
     parser.add_argument(

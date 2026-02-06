@@ -1,4 +1,16 @@
 {
+  "high_Qwen2_5_3B_Instruct_llh": {
+    "file_name": "math12K_highest_Qwen2_5_3B_Instruct_llh.json"
+  },
+  "low_Qwen2_5_3B_Instruct_llh": {
+    "file_name": "math12K_lowest_Qwen2_5_3B_Instruct_llh.json"
+  },
+  "high_Qwen2_5_Math_1_5B_llh": {
+    "file_name": "math12K_highest_Qwen2_5_Math_1_5B_llh.json"
+  },
+  "low_Qwen2_5_Math_1_5B_llh": {
+    "file_name": "math12K_lowest_Qwen2_5_Math_1_5B_llh.json"
+  },
   "high_grad_norm": {
     "file_name": "math12K_highest_gradient_norm.json"
   },

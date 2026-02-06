@@ -244,8 +244,8 @@ def evaluate_all_checkpoints(
 
     # Save results
     if output_path is None:
-        model_name = Path(model_folder).name
-        output_path = f"./prob_tracking/results/{model_name}_all_checkpoints_summary.json"
+        pool_name = Path(pool_path).stem
+        output_path = f"./prob_tracking/results/{pool_name}_all_checkpoints_summary.json"
 
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
@@ -295,7 +295,7 @@ def main():
         "--output_path",
         type=str,
         default=None,
-        help="Path to save output JSON (default: ./prob_tracking/results/<model_name>_all_checkpoints_summary.json)"
+        help="Path to save output JSON (default: ./prob_tracking/results/<pool_file_name>_all_checkpoints_summary.json)"
     )
     parser.add_argument(
         "--device",

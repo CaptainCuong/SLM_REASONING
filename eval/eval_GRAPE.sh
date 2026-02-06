@@ -1,11 +1,12 @@
 #!/bin/bash
 
 # Base model directory
-base_model_dir="/projects/ai_safe/cuongdc/Qwen_Math_high_grad_norm"
-# base_model_dir="Qwen/Qwen2.5-Math-7B"
+# base_model_dir="/projects/ai_safe/cuongdc/Qwen_Math_low_grad_norm"
+base_model_dir="Qwen/Qwen2.5-3B-Instruct"
 
 # Array of datasets to evaluate
 datasets=("math12k" "cn_math_2024" "gaokao" "grade_school_math" "kaoyan" "olympiadbench" "aime" "amc" "gpqa" "math" "minerva")
+datasets=("math12k" "amc")
 
 # Create array of all model paths to evaluate (base model + all checkpoints)
 model_paths=("$base_model_dir")

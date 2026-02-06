@@ -14,6 +14,7 @@ __pycache__/
 
 # Evaluation outputs
 eval/completions/
+eval/outputs/**
 
 # Image outputs
 prob_tracking/image/
@@ -24,3 +25,4 @@ prob_tracking/results/
 # Data files
 **.csv
 **.pkl
+data/*.json
