@@ -26,4 +26,5 @@ prob_tracking/results/
 **.csv
 **.pkl
 data/*.json
+!data/math12K_7B_solutions.json
 *.csv
