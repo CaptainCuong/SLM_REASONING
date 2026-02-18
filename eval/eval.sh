@@ -1,7 +1,7 @@
 CUDA_VISIBLE_DEVICES='0,1' \
 python eval.py \
---model_name_or_path "google/gemma-3-27b-it" \
---data_name "math12k_paraphrased_qwen72b" \
+--model_name_or_path "/projects/ai_safe/cuongdc/Qwen_mix_high_self_0.75_7B/checkpoint-3330" \
+--data_name "amc" \
 --prompt_type "qwen-instruct" \
 --temperature 0.0 \
 --start_idx 0 \
