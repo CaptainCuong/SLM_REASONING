@@ -26,3 +26,4 @@ prob_tracking/results/
 **.csv
 **.pkl
 data/*.json
+*.csv

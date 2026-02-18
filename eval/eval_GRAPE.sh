@@ -1,13 +1,12 @@
 #!/bin/bash
 
 # Base model directory
-# base_model_dir="/projects/ai_safe/cuongdc/Qwen_Math_low_grad_norm"
-base_model_dir="Qwen/Qwen2.5-3B-Instruct"
+base_model_dir="/projects/ai_safe/cuongdc/Qwen_low_3B_dpo" # No slash at the end
+# base_model_dir="google/gemma-3-27b-it" # No slash at the end
 
 # Array of datasets to evaluate
 datasets=("math12k" "cn_math_2024" "gaokao" "grade_school_math" "kaoyan" "olympiadbench" "aime" "amc" "gpqa" "math" "minerva")
-datasets=("math12k" "amc")
-
+datasets=("olympiadbench")
 # Create array of all model paths to evaluate (base model + all checkpoints)
 model_paths=("$base_model_dir")
 for checkpoint in "$base_model_dir"/checkpoint-*; do

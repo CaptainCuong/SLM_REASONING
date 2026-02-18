@@ -1,0 +1,3 @@
+python prob_tracking/generate_utils/select_high_low_random.py --field Qwen2.5_Math_1.5B_llh --input data/math12K_merged_loglikelihood.json --output prob_tracking/data/push_down_train_set/1.5B.json --top_n 50
+python prob_tracking/generate_utils/select_high_low_random.py --field Qwen2.5_3B_Instruct_llh --input data/math12K_merged_loglikelihood.json --output prob_tracking/data/push_down_train_set/3B.json --top_n 50
+python prob_tracking/generate_utils/select_high_low_random.py --field Qwen2.5_Math_7B_llh --input data/math12K_merged_loglikelihood.json --output prob_tracking/data/push_down_train_set/7B.json --top_n 50

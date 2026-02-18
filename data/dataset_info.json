@@ -1,4 +1,27 @@
 {
+  "math12K_high_low_mixed": {
+    "file_name": "math12K_high_low_mixed.json"
+  },
+  "high_Qwen2_5_3B_Instruct_llh_dpo": {
+    "file_name": "math12K_dpo_high_3B.json",
+    "ranking": true,
+    "formatting": "sharegpt",
+    "columns": {
+      "messages": "conversations",
+      "chosen": "chosen",
+      "rejected": "rejected"
+    }
+  },
+  "low_Qwen2_5_3B_Instruct_llh_dpo": {
+    "file_name": "math12K_dpo_low_3B.json",
+    "ranking": true,
+    "formatting": "sharegpt",
+    "columns": {
+      "messages": "conversations",
+      "chosen": "chosen",
+      "rejected": "rejected"
+    }
+  },
   "high_Qwen2_5_3B_Instruct_llh": {
     "file_name": "math12K_highest_Qwen2_5_3B_Instruct_llh.json"
   },

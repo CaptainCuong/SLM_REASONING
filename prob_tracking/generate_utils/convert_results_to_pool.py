@@ -1,7 +1,55 @@
 #!/usr/bin/env python3
 """
-Convert checkpoint generation results from a folder into a pool file.
-Each entry in the pool will include checkpoint information and correctness status.
+Convert checkpoint generation results from a folder into a pool file for
+probability tracking.
+
+Reads *_results.json files from a directory (one per checkpoint / base model),
+where each file contains:
+    {
+        "accuracy": 0.75,
+        "results": [
+            {
+                "instruction": "Please reason step by step...",
+                "question":  "What is 2+2?",
+                "generated_response": "The answer is 4. \\boxed{4}",
+                "is_correct": true
+            },
+            ...
+        ]
+    }
+
+Produces a pool JSON file with the format used by prob_tracking:
+    [
+        {
+            "instruction": "Please reason step by step...",
+            "input":  "What is 2+2?",
+            "output": "The answer is 4. \\boxed{4}",
+            "type":   "cp25_correct"        # or "base_incorrect", etc.
+        },
+        ...
+    ]
+
+The "type" field encodes checkpoint identity + correctness:
+    - "base_correct" / "base_incorrect"   for base_model_results.json
+    - "cp_25_correct" / "cp_25_incorrect" for checkpoint-25_results.json
+
+Usage:
+    # Basic conversion
+    python convert_results_to_pool.py \\
+        --results_dir  prob_tracking/results/Qwen_Math_high_generation_results \\
+        --output_file  prob_tracking/data/pool_high.json
+
+    # Exclude the base model
+    python convert_results_to_pool.py \\
+        --results_dir  prob_tracking/results/Qwen_Math_high_generation_results \\
+        --output_file  prob_tracking/data/pool_high.json \\
+        --no-base-model
+
+    # Also split into filtered pools (correct-only, incorrect-only, per-type)
+    python convert_results_to_pool.py \\
+        --results_dir  prob_tracking/results/Qwen_Math_high_generation_results \\
+        --output_file  prob_tracking/data/pool_high.json \\
+        --create-filtered --filtered-dir prob_tracking/data --prefix high_
 """
 
 import json

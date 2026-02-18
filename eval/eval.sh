@@ -1,9 +1,9 @@
 CUDA_VISIBLE_DEVICES='0,1' \
 python eval.py \
---model_name_or_path "/helios-storage/helios3-data/cuong/model/Qwen_Math_high/checkpoint-555/" \
---data_name "olympiadbench" \
+--model_name_or_path "google/gemma-3-27b-it" \
+--data_name "math12k_paraphrased_qwen72b" \
 --prompt_type "qwen-instruct" \
---temperature 0.7 \
+--temperature 0.0 \
 --start_idx 0 \
 --end_idx -1 \
 --n_sampling 1 \
@@ -11,5 +11,5 @@ python eval.py \
 --split "test" \
 --max_tokens 32768 \
 --seed 0 \
---top_p 0.9 \
+--top_p 1.0 \
 --surround_with_messages \
