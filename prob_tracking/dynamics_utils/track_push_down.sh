@@ -1,0 +1,8 @@
+python prob_tracking/dynamics_utils/evaluate_llh_all_checkpoints.py --pool_path prob_tracking/data/push_down_train_set/1.5B.json --base_model_path Qwen/Qwen2.5-1.5B --model_folder /projects/ai_safe/cuongdc/Qwen_Math_high_1.5B/ --output_path prob_tracking/results/track_push_down_1.5B_high.json
+python prob_tracking/dynamics_utils/evaluate_llh_all_checkpoints.py --pool_path prob_tracking/data/push_down_train_set/1.5B.json --base_model_path Qwen/Qwen2.5-1.5B --model_folder /projects/ai_safe/cuongdc/Qwen_Math_low_1.5B/ --output_path prob_tracking/results/track_push_down_1.5B_low.json
+
+python prob_tracking/dynamics_utils/evaluate_llh_all_checkpoints.py --pool_path prob_tracking/data/push_down_train_set/3B.json --base_model_path Qwen/Qwen2.5-3B-Instruct --model_folder /projects/ai_safe/cuongdc/Qwen_Math_high_3B/ --output_path prob_tracking/results/track_push_down_3B_high.json
+python prob_tracking/dynamics_utils/evaluate_llh_all_checkpoints.py --pool_path prob_tracking/data/push_down_train_set/3B.json --base_model_path Qwen/Qwen2.5-3B-Instruct --model_folder /projects/ai_safe/cuongdc/Qwen_Math_low_3B/ --output_path prob_tracking/results/track_push_down_3B_low.json
+
+python prob_tracking/dynamics_utils/evaluate_llh_all_checkpoints.py --pool_path prob_tracking/data/push_down_train_set/7B.json --base_model_path Qwen/Qwen2.5-Math-7B --model_folder /projects/ai_safe/cuongdc/Qwen_Math_high/ --output_path prob_tracking/results/track_push_down_7B_high.json
+python prob_tracking/dynamics_utils/evaluate_llh_all_checkpoints.py --pool_path prob_tracking/data/push_down_train_set/7B.json --base_model_path Qwen/Qwen2.5-Math-7B --model_folder /projects/ai_safe/cuongdc/Qwen_Math_low/ --output_path prob_tracking/results/track_push_down_7B_low.json

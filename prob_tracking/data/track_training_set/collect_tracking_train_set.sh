@@ -1,7 +1,9 @@
 python prob_tracking/generate_utils/convert_eval_with_base_to_pool.py --model_dir eval/outputs/cuongdc/Qwen_Math_high_7B/ --base_model_dir eval/outputs/Qwen/Qwen2.5-Math-7B --dataset math12k --output_file prob_tracking/data/track_training_set/train_high_7B.json
 python prob_tracking/generate_utils/convert_eval_with_base_to_pool.py --model_dir eval/outputs/cuongdc/Qwen_Math_low_7B/ --base_model_dir eval/outputs/Qwen/Qwen2.5-Math-7B --dataset math12k --output_file prob_tracking/data/track_training_set/train_low_7B.json
+
 python prob_tracking/generate_utils/convert_eval_with_base_to_pool.py --model_dir eval/outputs/cuongdc/Qwen_high_3B/ --base_model_dir eval/outputs/Qwen/Qwen2.5-3B-Instruct --dataset math12k --output_file prob_tracking/data/track_training_set/train_high_3B.json
 python prob_tracking/generate_utils/convert_eval_with_base_to_pool.py --model_dir eval/outputs/cuongdc/Qwen_low_3B/ --base_model_dir eval/outputs/Qwen/Qwen2.5-3B-Instruct --dataset math12k --output_file prob_tracking/data/track_training_set/train_low_3B.json
+
 python prob_tracking/generate_utils/convert_eval_with_base_to_pool.py --model_dir eval/outputs/cuongdc/Qwen_Math_high_1.5B/ --base_model_dir eval/outputs/Qwen/Qwen2.5-1.5B --dataset math12k --output_file prob_tracking/data/track_training_set/train_high_1.5B.json
 python prob_tracking/generate_utils/convert_eval_with_base_to_pool.py --model_dir eval/outputs/cuongdc/Qwen_Math_low_1.5B/ --base_model_dir eval/outputs/Qwen/Qwen2.5-1.5B --dataset math12k --output_file prob_tracking/data/track_training_set/train_low_1.5B.json
 

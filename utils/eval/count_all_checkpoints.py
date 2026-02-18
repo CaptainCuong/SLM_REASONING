@@ -304,8 +304,8 @@ def main():
     parser.add_argument(
         "--folder",
         type=str,
-        default="eval/outputs/model/Qwen_Math_high/",
-        help="Model folder containing checkpoint-* subfolders (default: eval/outputs/model/Qwen_Math_high/)"
+        default="eval/outputs/cuongdc/Qwen_Math_high/",
+        help="Model folder containing checkpoint-* subfolders (default: eval/outputs/cuongdc/Qwen_Math_high/)"
     )
     parser.add_argument(
         "--output",

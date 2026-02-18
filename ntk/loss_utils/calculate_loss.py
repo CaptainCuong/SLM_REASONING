@@ -109,7 +109,8 @@ def calculate_loss_for_sample(
     prompt: str,
     response: str,
     device: str,
-    max_length: int = 32768
+    max_length: int = 32768,
+    length_penalty: bool = False
 ) -> Dict[str, Any]:
     """
     Calculate loss for a single sample (prompt + response).
@@ -161,11 +162,13 @@ def calculate_loss_for_sample(
         )
 
     loss = outputs.loss
+    response_length = input_ids.shape[1] - prompt_length
+    loss_value = loss.item() * response_length if length_penalty else loss.item()
 
     result = {
-        'loss': loss.item(),
+        'loss': loss_value,
         'sequence_length': input_ids.shape[1],
-        'response_length': input_ids.shape[1] - prompt_length
+        'response_length': response_length
     }
 
     # Clean up to prevent memory leak
@@ -181,7 +184,8 @@ def calculate_loss_for_pool(
     tokenizer: Any,
     pool_data: List[Dict[str, Any]],
     device: str,
-    max_length: int = 32768
+    max_length: int = 32768,
+    length_penalty: bool = False
 ) -> List[Dict[str, Any]]:
     """
     Calculate loss for all samples in a pool.
@@ -215,7 +219,8 @@ def calculate_loss_for_pool(
             prompt=prompt,
             response=output_text,
             device=device,
-            max_length=max_length
+            max_length=max_length,
+            length_penalty=length_penalty
         )
 
         result = {
@@ -309,6 +314,11 @@ def main():
         default=32768,
         help="Maximum sequence length (default: 32768)"
     )
+    parser.add_argument(
+        "--length_penalty",
+        action="store_true",
+        help="Multiply loss by response length to penalize repetitive outputs"
+    )
 
     args = parser.parse_args()
 
@@ -330,13 +340,15 @@ def main():
 
     # Calculate loss for all samples
     print("\nCalculating losses...")
-    results = calculate_loss_for_pool(
-        model=model,
-        tokenizer=tokenizer,
-        pool_data=pool_data,
-        device=device,
-        max_length=args.max_length
-    )
+    with torch.no_grad():
+        results = calculate_loss_for_pool(
+            model=model,
+            tokenizer=tokenizer,
+            pool_data=pool_data,
+            device=device,
+            max_length=args.max_length,
+            length_penalty=args.length_penalty
+        )
 
     # Aggregate results
     summary = aggregate_results_by_type(results)

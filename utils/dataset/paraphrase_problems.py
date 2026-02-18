@@ -4,6 +4,7 @@ Paraphrase the 'problem' field in a JSONL file using Qwen model.
 """
 
 import json
+import re
 import argparse
 from pathlib import Path
 from tqdm import tqdm
@@ -24,14 +25,20 @@ def load_model(model_name: str, device: str = "cuda"):
     return model, tokenizer
 
 
+def extract_paraphrase(response: str) -> str:
+    """Extract the paraphrased problem from between <paraphrased> tags."""
+    match = re.search(r'<paraphrased>(.*?)</paraphrased>', response, re.DOTALL)
+    if match:
+        return match.group(1).strip()
+    return response.strip()
+
+
 def paraphrase_problem(model, tokenizer, problem: str, device: str = "cuda") -> str:
     """Paraphrase a single problem using the model."""
-    prompt = f"""Paraphrase the following math problem. Keep all mathematical expressions, numbers, and LaTeX formatting exactly the same. Only rephrase the surrounding text to express the same question differently.
+    prompt = f"""Rewrite the following math problem using different words and sentence structure. Change the phrasing significantly while keeping the exact same mathematical meaning, numbers, and constraints. Do NOT solve the problem or analyze it. Put your rewritten problem inside <paraphrased> and </paraphrased> tags.
 
-Original problem:
-{problem}
-
-Paraphrased problem:"""
+Original:
+{problem}"""
 
     messages = [
         {"role": "user", "content": prompt}
@@ -48,15 +55,15 @@ Paraphrased problem:"""
     with torch.no_grad():
         outputs = model.generate(
             **inputs,
-            max_new_tokens=512,
-            do_sample=False,
-            temperature=None,
-            top_p=None,
+            max_new_tokens=1024,
+            do_sample=True,
+            temperature=0.7,
+            top_p=0.9,
             pad_token_id=tokenizer.eos_token_id
         )
 
     response = tokenizer.decode(outputs[0][inputs['input_ids'].shape[1]:], skip_special_tokens=True)
-    return response.strip()
+    return extract_paraphrase(response)
 
 
 def process_jsonl(input_path: str, output_path: str, model_name: str, device: str = "cuda"):
@@ -75,12 +82,13 @@ def process_jsonl(input_path: str, output_path: str, model_name: str, device: st
     results = []
     for line in tqdm(lines, desc="Paraphrasing"):
         data = json.loads(line.strip())
-        original_problem = data.get('problem', '')
+        original_problem = data.get('question', '')
 
         if original_problem:
             paraphrased = paraphrase_problem(model, tokenizer, original_problem, device)
-            data['problem_original'] = original_problem
-            data['problem'] = paraphrased
+            # data['question'] = original_problem
+            # data['paraphrased_question'] = paraphrased
+            data['question'] = paraphrased
 
         results.append(data)
 
@@ -110,7 +118,7 @@ def main():
     parser.add_argument(
         "--model",
         type=str,
-        default="Qwen/Qwen2.5-7B-Instruct",
+        default="Qwen/Qwen2.5-72B",
         help="Model name or path for paraphrasing"
     )
     parser.add_argument(

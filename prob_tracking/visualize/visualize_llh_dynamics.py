@@ -9,11 +9,30 @@ per-question log-likelihood dynamics.
 
 import json
 import re
+import fnmatch
 import matplotlib.pyplot as plt
 import numpy as np
 from pathlib import Path
 import argparse
 from collections import defaultdict
+
+# Source detection and color mapping
+SOURCE_COLORS = {
+    'base': '#1f77b4',   # blue
+    'qwen': '#ff7f0e',   # orange
+    'highest': '#ff7f0e',  # orange
+    'gemma': '#2ca02c',  # green
+    'lowest': '#2ca02c',  # green
+}
+
+
+def detect_source(type_id: str) -> str:
+    """Detect source from a sample type ID by looking for keywords."""
+    type_id_lower = type_id.lower()
+    for source in ('lowest', 'highest','gemma', 'qwen', 'base'):
+        if source in type_id_lower:
+            return source
+    return 'unknown'
 
 
 def load_summary(summary_path: str):
@@ -22,42 +41,81 @@ def load_summary(summary_path: str):
         return json.load(f)
 
 
-def plot_avg_log_likelihood(summary: dict, output_path: str = None, show: bool = True):
+def filter_by_id_patterns(summary: dict, patterns: list) -> dict:
     """
-    Plot average log-likelihood for all sample types.
+    Filter results_by_type to only include types matching any of the given
+    glob/fnmatch patterns.
+
+    E.g., patterns=["id_9*"] matches "id_9_base_problem_paraphrased_greedy_incorrect".
+    """
+    filtered = {
+        k: v for k, v in summary['results_by_type'].items()
+        if any(fnmatch.fnmatch(k, p) for p in patterns)
+    }
+    return {**summary, 'results_by_type': filtered}
+
+
+def plot_avg_log_likelihood(summaries, output_path: str = None, show: bool = True,
+                           color_by_correctness: bool = False,
+                           color_by_source: bool = False):
+    """
+    Plot average log-likelihood for all sample types across one or more summaries.
 
     Args:
-        summary: Checkpoint summary dictionary
+        summaries: A single summary dict (legacy) or a list of (label, summary) tuples
         output_path: Path to save plot (optional)
         show: Whether to display plot
+        color_by_correctness: If True, color lines green/red by correctness
+        color_by_source: If True, color lines by source (base/qwen/gemma)
     """
-    steps = summary['steps']
-    results_by_type = summary['results_by_type']
+    # Normalize input: single summary -> list of (label, summary)
+    if isinstance(summaries, dict):
+        summaries = [('', summaries)]
+
+    # Collect all (label_prefix, sample_type, steps, avg_llh) entries
+    all_entries = []
+    for _, summary in summaries:
+        steps = summary['steps']
+        for sample_type, metrics in summary['results_by_type'].items():
+            all_entries.append((sample_type, sample_type, steps, metrics['avg_log_likelihood']))
 
     # Create figure
     plt.figure(figsize=(12, 8))
 
-    # Generate distinct colors for each line
-    num_types = len(results_by_type)
-    colors = plt.cm.tab10(np.linspace(0, 1, min(num_types, 10)))
-
-    # If more than 10 types, use additional color maps
-    if num_types > 10:
+    num_entries = len(all_entries)
+    colors = plt.cm.tab10(np.linspace(0, 1, min(num_entries, 10)))
+    if num_entries > 10:
         colors = list(colors)
-        colors.extend(plt.cm.Set3(np.linspace(0, 1, num_types - 10)))
+        colors.extend(plt.cm.Set3(np.linspace(0, 1, num_entries - 10)))
 
-    # Plot each sample type with a unique color
-    for idx, (sample_type, metrics) in enumerate(results_by_type.items()):
-        avg_llh = metrics['avg_log_likelihood']
+    if color_by_correctness:
+        correct_entries = [e for e in all_entries if '_correct' in e[1] and '_incorrect' not in e[1]]
+        incorrect_entries = [e for e in all_entries if '_incorrect' in e[1]]
+        green_shades = plt.cm.Greens(np.linspace(0.3, 0.9, max(len(correct_entries), 1)))
+        red_shades = plt.cm.Reds(np.linspace(0.3, 0.9, max(len(incorrect_entries), 1)))
+        correct_idx = 0
+        incorrect_idx = 0
 
-        # Filter out None values
+    for idx, (display_name, sample_type, steps, avg_llh) in enumerate(all_entries):
         valid_indices = [i for i, val in enumerate(avg_llh) if val is not None]
         valid_steps = [steps[i] for i in valid_indices]
         valid_llh = [avg_llh[i] for i in valid_indices]
 
         if valid_llh:
-            plt.plot(valid_steps, valid_llh, marker='o', label=sample_type,
-                    linewidth=2, color=colors[idx % len(colors)])
+            if color_by_source:
+                source = detect_source(sample_type)
+                color = SOURCE_COLORS.get(source, '#7f7f7f')
+            elif color_by_correctness:
+                if '_incorrect' in sample_type:
+                    color = red_shades[incorrect_idx % len(red_shades)]
+                    incorrect_idx += 1
+                else:
+                    color = green_shades[correct_idx % len(green_shades)]
+                    correct_idx += 1
+            else:
+                color = colors[idx % len(colors)]
+            plt.plot(valid_steps, valid_llh, marker='o', label=display_name,
+                    linewidth=2, color=color)
 
     plt.xlabel('Training Step', fontsize=12)
     plt.ylabel('Average Log-Likelihood', fontsize=12)
@@ -76,41 +134,64 @@ def plot_avg_log_likelihood(summary: dict, output_path: str = None, show: bool =
     plt.close()
 
 
-def plot_perplexity(summary: dict, output_path: str = None, show: bool = True):
+def plot_perplexity(summaries, output_path: str = None, show: bool = True,
+                    color_by_correctness: bool = False,
+                    color_by_source: bool = False):
     """
-    Plot average perplexity for all sample types.
+    Plot average perplexity for all sample types across one or more summaries.
 
     Args:
-        summary: Checkpoint summary dictionary
+        summaries: A single summary dict (legacy) or a list of (label, summary) tuples
         output_path: Path to save plot (optional)
         show: Whether to display plot
+        color_by_correctness: If True, color lines green/red by correctness
+        color_by_source: If True, color lines by source (base/qwen/gemma)
     """
-    steps = summary['steps']
-    results_by_type = summary['results_by_type']
+    if isinstance(summaries, dict):
+        summaries = [('', summaries)]
+
+    all_entries = []
+    for _, summary in summaries:
+        steps = summary['steps']
+        for sample_type, metrics in summary['results_by_type'].items():
+            all_entries.append((sample_type, sample_type, steps, metrics['avg_perplexity']))
 
     plt.figure(figsize=(12, 8))
 
-    # Generate distinct colors for each line
-    num_types = len(results_by_type)
-    colors = plt.cm.tab10(np.linspace(0, 1, min(num_types, 10)))
-
-    # If more than 10 types, use additional color maps
-    if num_types > 10:
+    num_entries = len(all_entries)
+    colors = plt.cm.tab10(np.linspace(0, 1, min(num_entries, 10)))
+    if num_entries > 10:
         colors = list(colors)
-        colors.extend(plt.cm.Set3(np.linspace(0, 1, num_types - 10)))
+        colors.extend(plt.cm.Set3(np.linspace(0, 1, num_entries - 10)))
 
-    # Plot each sample type with a unique color
-    for idx, (sample_type, metrics) in enumerate(results_by_type.items()):
-        avg_ppl = metrics['avg_perplexity']
+    if color_by_correctness:
+        correct_entries = [e for e in all_entries if '_correct' in e[1] and '_incorrect' not in e[1]]
+        incorrect_entries = [e for e in all_entries if '_incorrect' in e[1]]
+        green_shades = plt.cm.Greens(np.linspace(0.3, 0.9, max(len(correct_entries), 1)))
+        red_shades = plt.cm.Reds(np.linspace(0.3, 0.9, max(len(incorrect_entries), 1)))
+        correct_idx = 0
+        incorrect_idx = 0
 
-        # Filter out None values
+    for idx, (display_name, sample_type, steps, avg_ppl) in enumerate(all_entries):
         valid_indices = [i for i, val in enumerate(avg_ppl) if val is not None]
         valid_steps = [steps[i] for i in valid_indices]
         valid_ppl = [avg_ppl[i] for i in valid_indices]
 
         if valid_ppl:
-            plt.plot(valid_steps, valid_ppl, marker='o', label=sample_type,
-                    linewidth=2, color=colors[idx % len(colors)])
+            if color_by_source:
+                source = detect_source(sample_type)
+                color = SOURCE_COLORS.get(source, '#7f7f7f')
+            elif color_by_correctness:
+                if '_incorrect' in sample_type:
+                    color = red_shades[incorrect_idx % len(red_shades)]
+                    incorrect_idx += 1
+                else:
+                    color = green_shades[correct_idx % len(green_shades)]
+                    correct_idx += 1
+            else:
+                color = colors[idx % len(colors)]
+            plt.plot(valid_steps, valid_ppl, marker='o', label=display_name,
+                    linewidth=2, color=color)
 
     plt.xlabel('Training Step', fontsize=12)
     plt.ylabel('Average Perplexity', fontsize=12)
@@ -129,38 +210,43 @@ def plot_perplexity(summary: dict, output_path: str = None, show: bool = True):
     plt.close()
 
 
-def create_summary_stats(summary: dict):
+def create_summary_stats(summaries):
     """
     Print summary statistics for log-likelihood dynamics.
 
     Args:
-        summary: Checkpoint summary dictionary
+        summaries: A single summary dict (legacy) or a list of (label, summary) tuples
     """
-    steps = summary['steps']
-    results_by_type = summary['results_by_type']
+    if isinstance(summaries, dict):
+        summaries = [('', summaries)]
 
     print("\n" + "="*80)
     print("Log-Likelihood Dynamics Summary")
     print("="*80)
 
-    for sample_type, metrics in results_by_type.items():
-        avg_llh = metrics['avg_log_likelihood']
+    for label, summary in summaries:
+        steps = summary['steps']
+        results_by_type = summary['results_by_type']
 
-        # Filter out None values
-        valid_llh = [x for x in avg_llh if x is not None]
+        if label:
+            print(f"\n--- {label} ---")
 
-        if valid_llh:
-            initial = valid_llh[0]
-            final = valid_llh[-1]
-            improvement = final - initial
-            percent_change = (improvement / abs(initial)) * 100 if initial != 0 else 0
+        for sample_type, metrics in results_by_type.items():
+            avg_llh = metrics['avg_log_likelihood']
+            valid_llh = [x for x in avg_llh if x is not None]
 
-            print(f"\n{sample_type}:")
-            print(f"  Initial LLH: {initial:.4f}")
-            print(f"  Final LLH:   {final:.4f}")
-            print(f"  Change:      {improvement:+.4f} ({percent_change:+.2f}%)")
-            print(f"  Min LLH:     {min(valid_llh):.4f} (step {steps[avg_llh.index(min(valid_llh))]})")
-            print(f"  Max LLH:     {max(valid_llh):.4f} (step {steps[avg_llh.index(max(valid_llh))]})")
+            if valid_llh:
+                initial = valid_llh[0]
+                final = valid_llh[-1]
+                improvement = final - initial
+                percent_change = (improvement / abs(initial)) * 100 if initial != 0 else 0
+
+                print(f"\n{sample_type}:")
+                print(f"  Initial LLH: {initial:.4f}")
+                print(f"  Final LLH:   {final:.4f}")
+                print(f"  Change:      {improvement:+.4f} ({percent_change:+.2f}%)")
+                print(f"  Min LLH:     {min(valid_llh):.4f} (step {steps[avg_llh.index(min(valid_llh))]})")
+                print(f"  Max LLH:     {max(valid_llh):.4f} (step {steps[avg_llh.index(max(valid_llh))]})")
 
     print("\n" + "="*80)
 
@@ -197,59 +283,86 @@ def parse_type_string(type_str: str):
     return None, None, None
 
 
-def organize_by_question(summary: dict):
+def organize_by_question(summaries):
     """
     Organize results by question ID, averaging log-likelihood across types
     that belong to the same question at each checkpoint.
 
+    Correctness at each step is determined by the type whose generation source
+    matches that step (e.g., id_40_cp555_incorrect -> step 555 is incorrect).
+
+    Args:
+        summaries: A single summary dict (legacy) or a list of (label, summary) tuples
+
     Returns:
-        Dictionary mapping question_id to dict with 'steps', 'avg_llh', 'correctness'
+        Dictionary mapping display_key to dict with 'steps', 'avg_llh', 'correctness'
+        When multiple summaries are provided, keys are prefixed with the label.
     """
-    steps = summary['steps']
-    results_by_type = summary['results_by_type']
+    if isinstance(summaries, dict):
+        summaries = [('', summaries)]
 
-    questions = defaultdict(lambda: {
-        'llh_by_step': defaultdict(list),
-        'correctness_by_step': defaultdict(list)
-    })
+    # Map source to step: 'base' -> 0, '555' -> 555, etc.
+    def source_to_step(source):
+        if source == 'base':
+            return 0
+        return int(source)
 
-    for type_str, metrics in results_by_type.items():
-        question_id, source, correctness = parse_type_string(type_str)
-        if question_id is None:
-            continue
+    all_organized = {}
 
-        avg_llh = metrics['avg_log_likelihood']
-        for i, step in enumerate(steps):
-            if i < len(avg_llh) and avg_llh[i] is not None:
-                questions[question_id]['llh_by_step'][step].append(avg_llh[i])
-                questions[question_id]['correctness_by_step'][step].append(correctness)
+    for _, summary in summaries:
+        steps = summary['steps']
+        results_by_type = summary['results_by_type']
 
-    # Compute average across types for each question at each step
-    organized = {}
-    for q_id, data in questions.items():
-        sorted_steps = sorted(data['llh_by_step'].keys())
-        avg_llhs = [np.mean(data['llh_by_step'][s]) for s in sorted_steps]
+        questions = defaultdict(lambda: {
+            'llh_by_step': defaultdict(list),
+            'correctness_by_source': {}
+        })
 
-        # Correctness: "correct" if any type is correct at that step
-        correctness_list = []
-        for s in sorted_steps:
-            corrs = data['correctness_by_step'][s]
-            correctness_list.append('correct' if 'correct' in corrs else 'incorrect')
+        for type_str, metrics in results_by_type.items():
+            question_id, source, correctness = parse_type_string(type_str)
+            if question_id is None:
+                continue
 
-        organized[q_id] = {
-            'steps': sorted_steps,
-            'avg_llh': avg_llhs,
-            'correctness': correctness_list
-        }
+            avg_llh = metrics['avg_log_likelihood']
+            for i, step in enumerate(steps):
+                if i < len(avg_llh) and avg_llh[i] is not None:
+                    questions[question_id]['llh_by_step'][step].append(avg_llh[i])
 
-    return organized
+            src_step = source_to_step(source)
+            questions[question_id]['correctness_by_source'][src_step] = correctness
+
+        for q_id, data in questions.items():
+            sorted_steps = sorted(data['llh_by_step'].keys())
+            avg_llhs = [np.mean(data['llh_by_step'][s]) for s in sorted_steps]
+
+            correctness_by_source = data['correctness_by_source']
+            correctness_list = []
+            for s in sorted_steps:
+                if s in correctness_by_source:
+                    correctness_list.append(correctness_by_source[s])
+                else:
+                    earlier = [src for src in correctness_by_source if src <= s]
+                    if earlier:
+                        correctness_list.append(correctness_by_source[max(earlier)])
+                    else:
+                        correctness_list.append('unknown')
+
+            all_organized[q_id] = {
+                'steps': sorted_steps,
+                'avg_llh': avg_llhs,
+                'correctness': correctness_list
+            }
+
+    return all_organized
 
 
 def plot_llh_by_question(
     questions: dict,
     output_path: str = None,
     show: bool = True,
-    title: str = "Log-Likelihood Dynamics by Question"
+    title: str = "Log-Likelihood Dynamics by Question",
+    color_by_correctness: bool = False,
+    color_by_source: bool = False
 ):
     """
     Plot log-likelihood for each question across training steps.
@@ -263,16 +376,25 @@ def plot_llh_by_question(
         steps = data['steps']
         avg_llh = data['avg_llh']
         correctness = data['correctness']
-
-        color = colors[idx % len(colors)]
+        print(f"Question {q_id}: Steps={steps}, LLH={avg_llh}, Correctness={correctness}")
+        if color_by_source:
+            source = detect_source(str(q_id))
+            color = SOURCE_COLORS.get(source, '#7f7f7f')
+        elif color_by_correctness:
+            # Use final correctness to determine line color
+            final_correct = correctness[-1] == 'correct' if correctness else True
+            color = '#2ca02c' if final_correct else '#d62728'
+        else:
+            color = colors[idx % len(colors)]
 
         plt.plot(steps, avg_llh, marker='o', label=f'Q{q_id}',
-                linewidth=2, color=color, markersize=6)
+                linewidth=2, color=color, markersize=6, alpha=0.7)
 
-        # Mark incorrect points
-        for s, l, c in zip(steps, avg_llh, correctness):
-            if c == 'incorrect':
-                plt.scatter([s], [l], marker='x', color='red', s=100, zorder=5)
+        if not color_by_correctness and not color_by_source:
+            # Mark incorrect points only when not already colored by correctness
+            for s, l, c in zip(steps, avg_llh, correctness):
+                if c == 'incorrect':
+                    plt.scatter([s], [l], marker='x', color='red', s=100, zorder=5)
 
     plt.xlabel('Training Step', fontsize=12)
     plt.ylabel('Log-Likelihood', fontsize=12)
@@ -280,8 +402,16 @@ def plot_llh_by_question(
     plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=9)
     plt.grid(True, alpha=0.3)
 
-    plt.figtext(0.5, 0.02, 'Red X marks indicate incorrect predictions',
-                ha='center', fontsize=10, style='italic')
+    if color_by_source:
+        legend_text = ' | '.join(f'{src} = {clr}' for src, clr in SOURCE_COLORS.items())
+        plt.figtext(0.5, 0.02, f'Color by source: blue=base, orange=qwen, green=gemma',
+                    ha='center', fontsize=10, style='italic')
+    elif color_by_correctness:
+        plt.figtext(0.5, 0.02, 'Green = final correct, Red = final incorrect',
+                    ha='center', fontsize=10, style='italic')
+    else:
+        plt.figtext(0.5, 0.02, 'Red X marks indicate incorrect predictions',
+                    ha='center', fontsize=10, style='italic')
 
     plt.tight_layout()
 
@@ -331,8 +461,9 @@ def main():
     parser.add_argument(
         "--summary_path",
         type=str,
-        default="prob_tracking/results/Qwen_Math_high_all_checkpoints_summary.json",
-        help="Path to checkpoint summary JSON"
+        nargs='+',
+        default=[],
+        help="Path(s) to one or more checkpoint summary JSONs"
     )
     parser.add_argument(
         "--output_dir",
@@ -359,12 +490,35 @@ def main():
         help="Comma-separated list of question IDs to visualize (e.g., '1,2,3'). "
              "If not specified, visualize all questions."
     )
+    parser.add_argument(
+        "--id_patterns",
+        type=str,
+        nargs='+',
+        default=None,
+        help="Glob patterns to filter sample types by ID "
+             "(e.g., 'id_9*' matches 'id_9_base_problem_paraphrased_greedy_incorrect'). "
+             "Multiple patterns can be specified."
+    )
+    parser.add_argument(
+        "--color_by_correctness",
+        action="store_true",
+        help="Color lines by correctness (green=correct, red=incorrect) instead of unique colors"
+    )
+    parser.add_argument(
+        "--color_by_source",
+        action="store_true",
+        help="Color lines by source detected in ID (blue=base, orange=qwen, green=gemma)"
+    )
 
     args = parser.parse_args()
 
-    # Load summary
-    print(f"Loading summary from {args.summary_path}...")
-    summary = load_summary(args.summary_path)
+    # Load all summaries
+    summaries = []
+    for path in args.summary_path:
+        print(f"Loading summary from {path}...")
+        summary = load_summary(path)
+        label = Path(path).stem  # use filename (without extension) as label
+        summaries.append((label, summary))
 
     # Create output directory
     Path(args.output_dir).mkdir(parents=True, exist_ok=True)
@@ -374,30 +528,43 @@ def main():
     # Filter by question IDs if specified
     if args.questions is not None:
         requested_ids = [int(q.strip()) for q in args.questions.split(',')]
-        summary = filter_summary_by_questions(summary, requested_ids)
-        print(f"Filtered to question(s): {requested_ids} ({len(summary['results_by_type'])} types)")
+        summaries = [(label, filter_summary_by_questions(s, requested_ids))
+                     for label, s in summaries]
+        total_types = sum(len(s['results_by_type']) for _, s in summaries)
+        print(f"Filtered to question(s): {requested_ids} ({total_types} types total)")
+
+    # Filter by id patterns if specified
+    if args.id_patterns is not None:
+        summaries = [(label, filter_by_id_patterns(s, args.id_patterns))
+                     for label, s in summaries]
+        total_types = sum(len(s['results_by_type']) for _, s in summaries)
+        print(f"Filtered by id patterns {args.id_patterns} ({total_types} types total)")
 
     # Generate plots
     if args.plot_type in ['all', 'llh']:
         print("\nGenerating log-likelihood plot...")
-        create_summary_stats(summary)
+        create_summary_stats(summaries)
         plot_avg_log_likelihood(
-            summary,
+            summaries,
             output_path=f"{args.output_dir}/avg_llh.png",
-            show=show
+            show=show,
+            color_by_correctness=args.color_by_correctness,
+            color_by_source=args.color_by_source
         )
 
     if args.plot_type in ['all', 'perplexity']:
         print("\nGenerating perplexity plot...")
         plot_perplexity(
-            summary,
+            summaries,
             output_path=f"{args.output_dir}/avg_perplexity.png",
-            show=show
+            show=show,
+            color_by_correctness=args.color_by_correctness,
+            color_by_source=args.color_by_source
         )
 
     if args.plot_type in ['all', 'questions']:
         print("\nOrganizing data by question...")
-        questions = organize_by_question(summary)
+        questions = organize_by_question(summaries)
         print(f"Found {len(questions)} unique questions")
 
         create_question_summary_stats(questions)
@@ -406,7 +573,9 @@ def main():
         plot_llh_by_question(
             questions,
             output_path=f"{args.output_dir}/llh_by_question.png",
-            show=show
+            show=show,
+            color_by_correctness=args.color_by_correctness,
+            color_by_source=args.color_by_source
         )
 
     print("\nVisualization complete!")
