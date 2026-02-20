@@ -18,11 +18,11 @@ from collections import defaultdict
 
 # Source detection and color mapping
 SOURCE_COLORS = {
-    'base': '#1f77b4',   # blue
-    'qwen': '#ff7f0e',   # orange
-    'highest': '#ff7f0e',  # orange
-    'gemma': '#2ca02c',  # green
-    'lowest': '#2ca02c',  # green
+    'base':    '#1f77b4',   # blue
+    'qwen':    '#ff7f0e',   # orange
+    'gemma':   '#2ca02c',   # green
+    'highest': '#d62728',   # red
+    'lowest':  '#9467bd',   # purple
 }
 
 
@@ -404,7 +404,8 @@ def plot_llh_by_question(
 
     if color_by_source:
         legend_text = ' | '.join(f'{src} = {clr}' for src, clr in SOURCE_COLORS.items())
-        plt.figtext(0.5, 0.02, f'Color by source: blue=base, orange=qwen, green=gemma',
+        plt.figtext(0.5, 0.02,
+                    'Color by source: blue=base, orange=qwen, green=gemma, red=highest, purple=lowest',
                     ha='center', fontsize=10, style='italic')
     elif color_by_correctness:
         plt.figtext(0.5, 0.02, 'Green = final correct, Red = final incorrect',
