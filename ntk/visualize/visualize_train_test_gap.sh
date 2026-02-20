@@ -25,19 +25,56 @@
 #     done
 # done
 
-mkdir -p ntk/image/base_high_low_gap
+# mkdir -p ntk/image/base_high_low_gap
+# MODEL_SIZE="1.5 3 7"
+# for MODEL in $MODEL_SIZE; do
+#     # Visualize the gap between high and low loss distribution in training set evaluated by the base model
+#     python ntk/visualize/visualize_n_calculate_avg_loss_multiple.py \
+#             --results_paths ntk/results/train_set_results/losses_math12k_high_${MODEL}B.json \
+#                             ntk/results/train_set_results/losses_math12k_low_${MODEL}B.json \
+#             --labels "${MODEL} HIGH TRAIN" "${MODEL} LOW TRAIN" \
+#             --visualize --output_plot ntk/image/base_high_low_gap/${MODEL}B_train_base.png
+
+#     # Visualize the gap between high and low loss distribution in test set evaluated by the base model
+#     python ntk/visualize/visualize_n_calculate_avg_loss_multiple.py \
+#             --results_paths ntk/results/test_set_results/losses_amc_high_${MODEL}B.json \
+#                             ntk/results/test_set_results/losses_amc_low_${MODEL}B.json \
+#             --labels "${MODEL} HIGH TEST" "${MODEL} LOW TEST" \
+#             --visualize --output_plot ntk/image/base_high_low_gap/${MODEL}B_test_base.png
+# done
+
+mkdir -p ntk/image/teacher_high_low_gap
 MODEL_SIZE="1.5 3 7"
 for MODEL in $MODEL_SIZE; do
-    # python ntk/visualize/visualize_n_calculate_avg_loss_multiple.py \
-    #         --results_paths ntk/results/train_set_results/losses_math12k_high_${MODEL}B.json \
-    #                         ntk/results/train_set_results/losses_math12k_low_${MODEL}B.json \
-    #         --labels "${MODEL} HIGH TRAIN" "${MODEL} LOW TRAIN" \
-    #         --visualize --output_plot ntk/image/base_high_low_gap/${MODEL}B_base.png
-    python ntk/visualize/visualize_loss_distribution.py \
-        --results_path ntk/results/train_set_results/losses_final_cp_high_${MODEL}B.json \
-                       ntk/results/train_set_results/losses_final_cp_low_${MODEL}B.json \
-        --patterns "*base*" \
-        --labels "${MODEL}B HIGH" "${MODEL}B LOW" \
-        --plot_type histogram \
-        --output_plot ntk/image/base_high_low_gap/${MODEL}B_final_loss_gap.png
+    # Visualize the gap between high and low loss distribution in training set evaluated by the teacher model
+    python ntk/visualize/visualize_n_calculate_avg_loss_multiple.py \
+            --results_paths ntk/results/train_set_results/losses_gemma_math12k_high_${MODEL}B.json \
+                            ntk/results/train_set_results/losses_gemma_math12k_low_${MODEL}B.json \
+            --labels "${MODEL} HIGH TRAIN" "${MODEL} LOW TRAIN" \
+            --visualize --output_plot ntk/image/teacher_high_low_gap/${MODEL}B_train_teacher.png
+
+    # Visualize the gap between high and low loss distribution in test set evaluated by the teacher model
+    python ntk/visualize/visualize_n_calculate_avg_loss_multiple.py \
+            --results_paths ntk/results/test_set_results/losses_gemma_amc_high_${MODEL}B.json \
+                            ntk/results/test_set_results/losses_gemma_amc_low_${MODEL}B.json \
+            --labels "${MODEL} HIGH TEST" "${MODEL} LOW TEST" \
+            --visualize --output_plot ntk/image/teacher_high_low_gap/${MODEL}B_test_teacher.png
 done
+
+# mkdir -p ntk/image/final_high_low_gap
+# MODEL_SIZE="1.5 3 7"
+# for MODEL in $MODEL_SIZE; do
+#     # Visualize the gap between high and low loss distribution in training set evaluated by the final model
+#     python ntk/visualize/visualize_n_calculate_avg_loss_multiple.py \
+#             --results_paths ntk/results/train_set_results/losses_final_cp_high_${MODEL}B.json \
+#                             ntk/results/train_set_results/losses_final_cp_low_${MODEL}B.json \
+#             --labels "${MODEL} HIGH TRAIN" "${MODEL} LOW TRAIN" \
+#             --visualize --output_plot ntk/image/final_high_low_gap/${MODEL}B_train_final.png
+
+#     # Visualize the gap between high and low loss distribution in test set evaluated by the final model
+#     python ntk/visualize/visualize_n_calculate_avg_loss_multiple.py \
+#             --results_paths ntk/results/test_set_results/losses_final_cp_high_${MODEL}B.json \
+#                             ntk/results/test_set_results/losses_final_cp_low_${MODEL}B.json \
+#             --labels "${MODEL} HIGH TEST" "${MODEL} LOW TEST" \
+#             --visualize --output_plot ntk/image/final_high_low_gap/${MODEL}B_test_final.png
+# done

@@ -4,5 +4,7 @@ python prob_tracking/generate_utils/convert_eval_with_base_to_pool.py --model_di
 python prob_tracking/generate_utils/convert_eval_with_base_to_pool.py --model_dir eval/outputs/cuongdc/Qwen_high_3B --base_model_dir eval/outputs/Qwen/Qwen2.5-3B-Instruct --dataset amc --output_file prob_tracking/data/track_test_set/test_amc_high_3B.json
 python prob_tracking/generate_utils/convert_eval_with_base_to_pool.py --model_dir eval/outputs/cuongdc/Qwen_low_3B --base_model_dir eval/outputs/Qwen/Qwen2.5-3B-Instruct --dataset amc --output_file prob_tracking/data/track_test_set/test_amc_low_3B.json
 
+python prob_tracking/generate_utils/convert_eval_with_base_to_pool.py --model_dir eval/outputs/cuongdc/Qwen_high_3B_dpo --base_model_dir eval/outputs/Qwen/Qwen2.5-3B-Instruct --dataset amc --output_file prob_tracking/data/track_test_set/test_amc_high_3B_dpo.json
+
 python prob_tracking/generate_utils/convert_eval_with_base_to_pool.py --model_dir eval/outputs/cuongdc/Qwen_Math_high_7B --base_model_dir eval/outputs/Qwen/Qwen2.5-Math-7B --dataset amc --output_file prob_tracking/data/track_test_set/test_amc_high_7B.json
 python prob_tracking/generate_utils/convert_eval_with_base_to_pool.py --model_dir eval/outputs/cuongdc/Qwen_Math_low_7B --base_model_dir eval/outputs/Qwen/Qwen2.5-Math-7B --dataset amc --output_file prob_tracking/data/track_test_set/test_amc_low_7B.json
