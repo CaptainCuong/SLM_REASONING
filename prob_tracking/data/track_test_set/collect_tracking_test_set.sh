@@ -8,3 +8,8 @@ python prob_tracking/generate_utils/convert_eval_with_base_to_pool.py --model_di
 
 python prob_tracking/generate_utils/convert_eval_with_base_to_pool.py --model_dir eval/outputs/cuongdc/Qwen_Math_high_7B --base_model_dir eval/outputs/Qwen/Qwen2.5-Math-7B --dataset amc --output_file prob_tracking/data/track_test_set/test_amc_high_7B.json
 python prob_tracking/generate_utils/convert_eval_with_base_to_pool.py --model_dir eval/outputs/cuongdc/Qwen_Math_low_7B --base_model_dir eval/outputs/Qwen/Qwen2.5-Math-7B --dataset amc --output_file prob_tracking/data/track_test_set/test_amc_low_7B.json
+
+OUTPUT_FILE="prob_tracking/data/track_test_set/test_amc_gemma.json"
+touch "$OUTPUT_FILE"
+printf '[\n]\n' > "$OUTPUT_FILE"
+python prob_tracking/generate_utils/add_eval_samples_to_pool.py --eval_file eval/outputs/google/gemma-3-27b-it/amc/test_qwen-instruct_t0.0_k1_s0_e40.jsonl --pool_file prob_tracking/data/track_test_set/test_amc_gemma.json --output_file prob_tracking/data/track_test_set/test_amc_gemma.json --tag gemma

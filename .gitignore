@@ -21,9 +21,6 @@ prob_tracking/image/
 ntk/image/
 images/
 
-#
-prob_tracking/results/
-
 # Data files
 **.csv
 **.pkl
