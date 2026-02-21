@@ -122,8 +122,7 @@ unset __conda_setup
 conda activate llama310
 # <<< conda initialize <<<
 
-# Hugging Face cache directory
-export HF_HOME="/workspace/.cache/huggingface"
-export HUGGINGFACE_HUB_CACHE="/workspace/.cache/huggingface/hub"
-export TRANSFORMERS_CACHE="/workspace/.cache/huggingface/transformers"
-
+# set PATH so it includes user's private bin if it exists
+export HF_HOME="/helios-storage/helios4-data/cuong/huggingface"
+export HF_HUB_CACHE="/helios-storage/helios4-data/cuong/huggingface/hub"
+export TRANSFORMERS_CACHE="/helios-storage/helios4-data/cuong/huggingface/transformers"
