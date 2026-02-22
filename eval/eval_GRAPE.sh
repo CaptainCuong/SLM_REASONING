@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # Base model directory
-base_model_dir="/projects/ai_safe/cuongdc/Qwen_mix_high_self_0.75_7B" # No slash at the end
 base_model_dir="Qwen/Qwen2.5-72B" # No slash at the end
+base_model_dir="Qwen/Qwen2.5-Math-7B" # No slash at the end
 
 # Array of datasets to evaluate
 datasets=("math12k" "cn_math_2024" "gaokao" "grade_school_math" "kaoyan" "olympiadbench" "aime" "amc" "gpqa" "math" "minerva")
-datasets=("amc")
+datasets=("math12k")
 # Create array of all model paths to evaluate (base model + all checkpoints)
 model_paths=("$base_model_dir")
 for checkpoint in "$base_model_dir"/checkpoint-*; do
@@ -25,12 +25,12 @@ for model_path in "${model_paths[@]}"; do
     for data_name in "${datasets[@]}"; do
         echo "Running evaluation for dataset: $data_name"
 
-        CUDA_VISIBLE_DEVICES='0,1,2,3' \
+        CUDA_VISIBLE_DEVICES='2,3' \
         python eval.py \
         --model_name_or_path "$model_path" \
         --data_name "$data_name" \
         --prompt_type "qwen-instruct" \
-        --temperature 0.0 \
+        --temperature 0.7 \
         --start_idx 0 \
         --end_idx -1 \
         --n_sampling 1 \
@@ -38,7 +38,7 @@ for model_path in "${model_paths[@]}"; do
         --split "test" \
         --max_tokens 32768 \
         --seed 0 \
-        --top_p 1 \
+        --top_p 0.9 \
         --surround_with_messages
 
         echo "Completed evaluation for $data_name on $model_path"
