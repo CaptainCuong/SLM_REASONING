@@ -15,17 +15,17 @@ mkdir -p prob_tracking/image/track_test_set/low_1.5B/Q${Q}/source
 mkdir -p prob_tracking/image/track_test_set/high_1.5B/Q${Q}/multiple_attributes
 mkdir -p prob_tracking/image/track_test_set/low_1.5B/Q${Q}/multiple_attributes
 
-# ### Raw visualization ###
-# python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/test_amc_high_1.5B_all_checkpoints_summary.json --question ${Q} --output_dir prob_tracking/image/track_test_set/high_1.5B/Q${Q}/raw --no_show
-# python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/test_amc_low_1.5B_all_checkpoints_summary.json --question ${Q} --output_dir prob_tracking/image/track_test_set/low_1.5B/Q${Q}/raw --no_show
+### Raw visualization ###
+python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/test_amc_high_1.5B_all_checkpoints_summary.json prob_tracking/results/test_amc_teacher_high_1.5B.json --question ${Q} --output_dir prob_tracking/image/track_test_set/high_1.5B/Q${Q}/raw --no_show
+python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/test_amc_low_1.5B_all_checkpoints_summary.json prob_tracking/results/test_amc_teacher_low_1.5B.json --question ${Q} --output_dir prob_tracking/image/track_test_set/low_1.5B/Q${Q}/raw --no_show
 
-# ### Color by correctness ###
-# python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/test_amc_high_1.5B_all_checkpoints_summary.json --question ${Q} --output_dir prob_tracking/image/track_test_set/high_1.5B/Q${Q}/correctness --color_by_correctness --no_show
-# python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/test_amc_low_1.5B_all_checkpoints_summary.json --question ${Q} --output_dir prob_tracking/image/track_test_set/low_1.5B/Q${Q}/correctness --color_by_correctness --no_show
+### Color by correctness ###
+python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/test_amc_high_1.5B_all_checkpoints_summary.json prob_tracking/results/test_amc_teacher_high_1.5B.json --question ${Q} --output_dir prob_tracking/image/track_test_set/high_1.5B/Q${Q}/correctness --color_by_correctness --no_show
+python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/test_amc_low_1.5B_all_checkpoints_summary.json prob_tracking/results/test_amc_teacher_low_1.5B.json --question ${Q} --output_dir prob_tracking/image/track_test_set/low_1.5B/Q${Q}/correctness --color_by_correctness --no_show
 
-# ### Color by source ###
-# python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/test_amc_high_1.5B_all_checkpoints_summary.json --question ${Q} --output_dir prob_tracking/image/track_test_set/high_1.5B/Q${Q}/source --color_by_source --no_show
-# python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/test_amc_low_1.5B_all_checkpoints_summary.json --question ${Q} --output_dir prob_tracking/image/track_test_set/low_1.5B/Q${Q}/source --color_by_source --no_show
+### Color by source ###
+python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/test_amc_high_1.5B_all_checkpoints_summary.json prob_tracking/results/test_amc_teacher_high_1.5B.json --question ${Q} --output_dir prob_tracking/image/track_test_set/high_1.5B/Q${Q}/source --color_by_source --no_show
+python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/test_amc_low_1.5B_all_checkpoints_summary.json prob_tracking/results/test_amc_teacher_low_1.5B.json --question ${Q} --output_dir prob_tracking/image/track_test_set/low_1.5B/Q${Q}/source --color_by_source --no_show
 
 ### Color by multiple attributes ###
 python prob_tracking/visualize/visualize_multi_factor.py --summary_path prob_tracking/results/test_amc_high_1.5B_all_checkpoints_summary.json prob_tracking/results/test_amc_teacher_high_1.5B.json --question ${Q} --output_dir prob_tracking/image/track_test_set/high_1.5B/Q${Q}/multiple_attributes
@@ -47,17 +47,17 @@ mkdir -p prob_tracking/image/track_test_set/low_3B/Q${Q}/source
 mkdir -p prob_tracking/image/track_test_set/high_3B/Q${Q}/multiple_attributes
 mkdir -p prob_tracking/image/track_test_set/low_3B/Q${Q}/multiple_attributes
 
-# ### Raw visualization ###
-# python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/test_amc_high_3B_all_checkpoints_summary.json --question ${Q} --output_dir prob_tracking/image/track_test_set/high_3B/Q${Q}/raw --no_show
-# python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/test_amc_low_3B_all_checkpoints_summary.json --question ${Q} --output_dir prob_tracking/image/track_test_set/low_3B/Q${Q}/raw --no_show
+### Raw visualization ###
+python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/test_amc_high_3B_all_checkpoints_summary.json prob_tracking/results/test_amc_teacher_high_3B.json --question ${Q} --output_dir prob_tracking/image/track_test_set/high_3B/Q${Q}/raw --no_show
+python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/test_amc_low_3B_all_checkpoints_summary.json prob_tracking/results/test_amc_teacher_low_3B.json --question ${Q} --output_dir prob_tracking/image/track_test_set/low_3B/Q${Q}/raw --no_show
 
-# #### Color by correctness ###
-# python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/test_amc_high_3B_all_checkpoints_summary.json --question ${Q} --output_dir prob_tracking/image/track_test_set/high_3B/Q${Q}/correctness --color_by_correctness --no_show
-# python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/test_amc_low_3B_all_checkpoints_summary.json --question ${Q} --output_dir prob_tracking/image/track_test_set/low_3B/Q${Q}/correctness --color_by_correctness --no_show
+### Color by correctness ###
+python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/test_amc_high_3B_all_checkpoints_summary.json prob_tracking/results/test_amc_teacher_high_3B.json --question ${Q} --output_dir prob_tracking/image/track_test_set/high_3B/Q${Q}/correctness --color_by_correctness --no_show
+python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/test_amc_low_3B_all_checkpoints_summary.json prob_tracking/results/test_amc_teacher_low_3B.json --question ${Q} --output_dir prob_tracking/image/track_test_set/low_3B/Q${Q}/correctness --color_by_correctness --no_show
 
-# ### Color by source ###
-# python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/test_amc_high_3B_all_checkpoints_summary.json --question ${Q} --output_dir prob_tracking/image/track_test_set/high_3B/Q${Q}/source --color_by_source --no_show
-# python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/test_amc_low_3B_all_checkpoints_summary.json --question ${Q} --output_dir prob_tracking/image/track_test_set/low_3B/Q${Q}/source --color_by_source --no_show
+### Color by source ###
+python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/test_amc_high_3B_all_checkpoints_summary.json prob_tracking/results/test_amc_teacher_high_3B.json --question ${Q} --output_dir prob_tracking/image/track_test_set/high_3B/Q${Q}/source --color_by_source --no_show
+python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/test_amc_low_3B_all_checkpoints_summary.json prob_tracking/results/test_amc_teacher_low_3B.json --question ${Q} --output_dir prob_tracking/image/track_test_set/low_3B/Q${Q}/source --color_by_source --no_show
 
 ### Color by multiple attributes ###
 python prob_tracking/visualize/visualize_multi_factor.py --summary_path prob_tracking/results/test_amc_high_3B_all_checkpoints_summary.json prob_tracking/results/test_amc_teacher_high_3B.json --question ${Q} --output_dir prob_tracking/image/track_test_set/high_3B/Q${Q}/multiple_attributes
@@ -79,17 +79,17 @@ mkdir -p prob_tracking/image/track_test_set/low_7B/Q${Q}/source
 mkdir -p prob_tracking/image/track_test_set/high_7B/Q${Q}/multiple_attributes
 mkdir -p prob_tracking/image/track_test_set/low_7B/Q${Q}/multiple_attributes
 
-# ### Raw visualization ###
-# python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/test_amc_high_7B_all_checkpoints_summary.json --question ${Q} --output_dir prob_tracking/image/track_test_set/high_7B/Q${Q}/raw --no_show
-# python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/test_amc_low_7B_all_checkpoints_summary.json --question ${Q} --output_dir prob_tracking/image/track_test_set/low_7B/Q${Q}/raw --no_show
+### Raw visualization ###
+python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/test_amc_high_7B_all_checkpoints_summary.json prob_tracking/results/test_amc_teacher_high_7B.json --question ${Q} --output_dir prob_tracking/image/track_test_set/high_7B/Q${Q}/raw --no_show
+python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/test_amc_low_7B_all_checkpoints_summary.json prob_tracking/results/test_amc_teacher_low_7B.json --question ${Q} --output_dir prob_tracking/image/track_test_set/low_7B/Q${Q}/raw --no_show
 
-# #### Color by correctness ###
-# python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/test_amc_high_7B_all_checkpoints_summary.json --question ${Q} --output_dir prob_tracking/image/track_test_set/high_7B/Q${Q}/correctness --color_by_correctness --no_show
-# python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/test_amc_low_7B_all_checkpoints_summary.json --question ${Q} --output_dir prob_tracking/image/track_test_set/low_7B/Q${Q}/correctness --color_by_correctness --no_show
+### Color by correctness ###
+python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/test_amc_high_7B_all_checkpoints_summary.json prob_tracking/results/test_amc_teacher_high_7B.json --question ${Q} --output_dir prob_tracking/image/track_test_set/high_7B/Q${Q}/correctness --color_by_correctness --no_show
+python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/test_amc_low_7B_all_checkpoints_summary.json prob_tracking/results/test_amc_teacher_low_7B.json --question ${Q} --output_dir prob_tracking/image/track_test_set/low_7B/Q${Q}/correctness --color_by_correctness --no_show
 
-# ### Color by source ###
-# python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/test_amc_high_7B_all_checkpoints_summary.json --question ${Q} --output_dir prob_tracking/image/track_test_set/high_7B/Q${Q}/source --color_by_source --no_show
-# python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/test_amc_low_7B_all_checkpoints_summary.json --question ${Q} --output_dir prob_tracking/image/track_test_set/low_7B/Q${Q}/source --color_by_source --no_show
+### Color by source ###
+python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/test_amc_high_7B_all_checkpoints_summary.json prob_tracking/results/test_amc_teacher_high_7B.json --question ${Q} --output_dir prob_tracking/image/track_test_set/high_7B/Q${Q}/source --color_by_source --no_show
+python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/test_amc_low_7B_all_checkpoints_summary.json prob_tracking/results/test_amc_teacher_low_7B.json --question ${Q} --output_dir prob_tracking/image/track_test_set/low_7B/Q${Q}/source --color_by_source --no_show
 
 ### Color by multiple attributes ###
 python prob_tracking/visualize/visualize_multi_factor.py --summary_path prob_tracking/results/test_amc_high_7B_all_checkpoints_summary.json prob_tracking/results/test_amc_teacher_high_7B.json --question ${Q} --output_dir prob_tracking/image/track_test_set/high_7B/Q${Q}/multiple_attributes
