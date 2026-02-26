@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Base model directory
-base_model_dir="Qwen/Qwen2.5-72B" # No slash at the end
 base_model_dir="Qwen/Qwen2.5-Math-7B" # No slash at the end
+base_model_dir="/helios-storage/helios4-data/cuong/model/Qwen_Math_low_1.5B" # No slash at the end
 
 # Array of datasets to evaluate
 datasets=("math12k" "cn_math_2024" "gaokao" "grade_school_math" "kaoyan" "olympiadbench" "aime" "amc" "gpqa" "math" "minerva")
@@ -25,7 +25,7 @@ for model_path in "${model_paths[@]}"; do
     for data_name in "${datasets[@]}"; do
         echo "Running evaluation for dataset: $data_name"
 
-        CUDA_VISIBLE_DEVICES='2,3' \
+        CUDA_VISIBLE_DEVICES='0,1' \
         python eval.py \
         --model_name_or_path "$model_path" \
         --data_name "$data_name" \

@@ -27,3 +27,6 @@ data/*.json
 !data/math12K_7B_solutions.json
 *.csv
 *.zip
+*.sh
+models/
+saves/

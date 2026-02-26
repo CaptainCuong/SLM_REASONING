@@ -46,18 +46,24 @@ def count_correct_in_file(file_path):
     }
 
 
-def count_dataset_accuracy(dataset_folder):
+def count_dataset_accuracy(dataset_folder, temp=None):
     """
     Count accuracy for all JSONL files in a dataset folder.
 
     Args:
         dataset_folder: Path to dataset folder containing JSONL files
+        temp: Temperature value to filter files (e.g. 0.6 matches *_t0.6_*.jsonl).
+              If None, all JSONL files are used.
 
     Returns:
         dict with aggregated statistics
     """
     dataset_folder = Path(dataset_folder)
-    jsonl_files = list(dataset_folder.glob("*.jsonl"))
+    if temp is not None:
+        temp_str = f"{float(temp):.1f}"
+        jsonl_files = list(dataset_folder.glob(f"*_t{temp_str}_*.jsonl"))
+    else:
+        jsonl_files = list(dataset_folder.glob("*.jsonl"))
 
     if not jsonl_files:
         return None
@@ -85,12 +91,13 @@ def count_dataset_accuracy(dataset_folder):
     }
 
 
-def count_all_datasets_in_folder(base_folder):
+def count_all_datasets_in_folder(base_folder, temp=None):
     """
     Count accuracy for all datasets in a base folder.
 
     Args:
         base_folder: Path to base folder containing dataset subfolders
+        temp: Temperature value to filter files (passed to count_dataset_accuracy)
 
     Returns:
         List of result dictionaries for each dataset
@@ -106,7 +113,7 @@ def count_all_datasets_in_folder(base_folder):
 
     results = []
     for dataset_folder in sorted(dataset_folders):
-        result = count_dataset_accuracy(dataset_folder)
+        result = count_dataset_accuracy(dataset_folder, temp=temp)
         if result:
             results.append(result)
 
@@ -202,11 +209,21 @@ def main():
         default="./results.csv",
         help="CSV file to save results (default: ./results.csv)"
     )
+    parser.add_argument(
+        "--temp",
+        type=str,
+        default=None,
+        help="Temperature filter for file selection (e.g. 0 → *_t0.0_*.jsonl, 0.6 → *_t0.6_*.jsonl). "
+             "If not set, all JSONL files are used."
+    )
 
     args = parser.parse_args()
 
+    if args.temp is not None:
+        print(f"Temperature filter: t={float(args.temp):.1f}")
+
     # Count accuracy for all datasets
-    results = count_all_datasets_in_folder(args.folder)
+    results = count_all_datasets_in_folder(args.folder, temp=args.temp)
 
     if not results:
         print(f"No datasets found in {args.folder}")

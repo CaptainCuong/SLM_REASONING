@@ -52,34 +52,48 @@ SOURCE_COLORS = {
 }
 
 
-def _build_cp_palette(threshold: float = 0.25) -> list:
+def _build_cp_palette(n_needed: int = 20, threshold: float = 0.25) -> list:
     """
-    Build a palette for cp checkpoint colors from tab20, excluding any color
-    that is perceptually close (Euclidean RGB distance < threshold) to a
-    named source color (base / gemma / qwen / highest / lowest).
+    Build a palette with at least n_needed unique checkpoint colors by sampling
+    from gist_rainbow (full visible spectrum), excluding any color that is
+    perceptually close (Euclidean RGB distance < threshold) to a named source
+    color (base / gemma / qwen / highest / lowest).
 
-    With threshold=0.25 this reliably removes tab20 hues that overlap with
-    the fixed source colors.
+    Over-sampling by 5x ensures n_needed colors survive the filter even after
+    hues overlapping with the fixed source palette are removed.
     """
     reserved = [
         mcolors.to_rgba(c)
         for k, c in SOURCE_COLORS.items()
         if k != 'unknown'
     ]
+    cmap = plt.cm.gist_rainbow
+    n_candidates = n_needed * 5
     palette = []
-    for i in range(20):
-        c = plt.cm.tab20(i / 20)
+    for i in range(n_candidates):
+        c = cmap(i / n_candidates)
         min_dist = min(
             sum((c[j] - r[j]) ** 2 for j in range(3)) ** 0.5
             for r in reserved
         )
         if min_dist > threshold:
             palette.append(c)
+            if len(palette) >= n_needed:
+                break
+    # Safety fallback: if threshold was too strict, lower it
+    if len(palette) < n_needed:
+        for i in range(n_candidates):
+            c = cmap(i / n_candidates)
+            if c not in palette:
+                palette.append(c)
+            if len(palette) >= n_needed:
+                break
     return palette
 
 
-# Pre-built at import time; guaranteed not to overlap Base / Gemma / Qwen colors
-_CP_PALETTE = _build_cp_palette()
+# Pre-built at import time; guaranteed 20 distinct colors, none overlapping
+# with the fixed Base / Gemma / Qwen / Highest / Lowest source colors.
+_CP_PALETTE = _build_cp_palette(n_needed=20)
 
 LINESTYLES = {
     'original':    '-',
@@ -163,11 +177,12 @@ def make_cp_color_map(cp_sources: list) -> dict:
     Assign a unique color from _CP_PALETTE to each cp source string.
     Colors are guaranteed not to overlap with Base, Gemma, or Qwen.
     Returns a dict mapping 'cp<N>' -> rgba color.
+    If more than 20 checkpoints are found, the palette is rebuilt on the fly
+    to ensure every checkpoint gets a distinct color (no cycling).
     """
-    return {
-        src: _CP_PALETTE[i % len(_CP_PALETTE)]
-        for i, src in enumerate(cp_sources)
-    }
+    n = len(cp_sources)
+    palette = _CP_PALETTE if n <= len(_CP_PALETTE) else _build_cp_palette(n_needed=n)
+    return {src: palette[i] for i, src in enumerate(cp_sources)}
 
 
 def get_color(source: str, cp_color_map: dict) -> object:
