@@ -23,10 +23,11 @@ images/
 # Data files
 **.csv
 **.pkl
-data/*.json
+data/**.json
 !data/math12K_7B_solutions.json
 *.csv
 *.zip
 *.sh
+!data/math12K_teacher_answers*.json
 models/
 saves/
