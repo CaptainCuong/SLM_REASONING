@@ -2,6 +2,8 @@
 
 # Base model directory
 base_model_dir="/projects/ai_safe/cuongdc/Qwen_mix_high_self_0.75_7B" # No slash at the end
+# GPU management: 8 GPUs, 1 GPU per job
+NUM_GPUS=8
 
 # Array of datasets to evaluate
 datasets=("cn_math_2024" "gaokao" "grade_school_math" "kaoyan" "olympiadbench" "aime" "gpqa" "math" "minerva")
@@ -14,8 +16,6 @@ for checkpoint in "$base_model_dir"/checkpoint-*; do
     fi
 done
 
-# GPU management: 8 GPUs, 1 GPU per job
-NUM_GPUS=2
 declare -a gpu_pids  # PID of the job running on each GPU slot
 
 # Initialize all GPU slots as free
@@ -63,7 +63,6 @@ for model_path in "${model_paths[@]}"; do
         --seed 0 \
         --top_p 0.9 \
         --surround_with_messages \
-        --output_dir "./outputs/cuongdc/Qwen_mix_high_self_0.75_7B" \
         > "./logs/Qwen_mix_high_self_0.75_7B_$(basename "$model_path")_${data_name}.log" 2>&1 &
 
         gpu_pids[$gpu_id]=$!
