@@ -1,12 +1,11 @@
 #!/bin/bash
 
 # Base model directory
-base_model_dir="Qwen/Qwen2.5-72B" # No slash at the end
-base_model_dir="Qwen/Qwen2.5-Math-7B" # No slash at the end
+base_model_dir="/projects/ai_safe/cuongdc/adaptive_7B_low/epoch_2" # No slash at the end
 
 # Array of datasets to evaluate
 datasets=("math12k" "cn_math_2024" "gaokao" "grade_school_math" "kaoyan" "olympiadbench" "aime" "amc" "gpqa" "math" "minerva")
-datasets=("math12k")
+datasets=("cn_math_2024" "gaokao" "grade_school_math" "kaoyan" "olympiadbench" "aime" "gpqa" "math" "minerva")
 # Create array of all model paths to evaluate (base model + all checkpoints)
 model_paths=("$base_model_dir")
 for checkpoint in "$base_model_dir"/checkpoint-*; do
@@ -25,7 +24,7 @@ for model_path in "${model_paths[@]}"; do
     for data_name in "${datasets[@]}"; do
         echo "Running evaluation for dataset: $data_name"
 
-        CUDA_VISIBLE_DEVICES='2,3' \
+        CUDA_VISIBLE_DEVICES='0,1' \
         python eval.py \
         --model_name_or_path "$model_path" \
         --data_name "$data_name" \
@@ -39,7 +38,8 @@ for model_path in "${model_paths[@]}"; do
         --max_tokens 32768 \
         --seed 0 \
         --top_p 0.9 \
-        --surround_with_messages
+        --surround_with_messages \
+        --output_dir "./outputs/adaptive_7B_low" \
 
         echo "Completed evaluation for $data_name on $model_path"
         echo "------------------------------------------"
