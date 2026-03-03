@@ -31,5 +31,6 @@ data/*.json
 *.zip
 *.sh
 !train_script/*.sh
+!eval/*.sh
 models/
 saves/
