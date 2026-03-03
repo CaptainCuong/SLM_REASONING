@@ -5,7 +5,7 @@ Interactive web app for visualizing log-likelihood dynamics from checkpoint summ
 Usage:
     cd interactive_app
     python app.py
-    # Then open http://localhost:5000 in your browser
+    # Then open http://localhost:8080 in your browser
 
 Dependencies:
     pip install flask numpy
@@ -31,6 +31,48 @@ SOURCE_COLORS = {
     "highest": "#d62728",
     "lowest":  "#9467bd",
 }
+
+PATTERN_COLORS = [
+    "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
+    "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf",
+]
+
+
+def hex_to_rgba(hex_color: str, alpha: float) -> str:
+    h = hex_color.lstrip("#")
+    r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+    return f"rgba({r},{g},{b},{alpha})"
+
+
+def compute_avg_curve(summaries: list, pattern: str) -> tuple:
+    """
+    For a single fnmatch pattern, compute per-step (mean, std) across all
+    matching IDs in all loaded summaries.  Mirrors visualize_avg_llh_by_pattern.py.
+    """
+    if not summaries:
+        return [], [], []
+    reference_steps = summaries[0][1]["steps"]
+    n_steps = len(reference_steps)
+    values_per_step: list = [[] for _ in range(n_steps)]
+
+    for _, data in summaries:
+        results = data.get("results_by_type", {})
+        matched = [k for k in results if fnmatch.fnmatch(k, pattern)]
+        for key in matched:
+            series = results[key]["avg_log_likelihood"]
+            for i in range(min(n_steps, len(series))):
+                if series[i] is not None:
+                    values_per_step[i].append(series[i])
+
+    means, stds, valid_steps = [], [], []
+    for step, vals in zip(reference_steps, values_per_step):
+        if vals:
+            arr = np.array(vals)
+            means.append(float(arr.mean()))
+            stds.append(float(arr.std()))
+            valid_steps.append(step)
+
+    return valid_steps, means, stds
 
 # ---------------------------------------------------------------------------
 # Data helpers (mirror logic from visualize_llh_dynamics.py)
@@ -279,6 +321,67 @@ def get_data():
             "ylabel": "Average Log-Likelihood",
         })
 
+    # ---- Avg log-likelihood by pattern ----
+    elif plot_type == "avg_by_pattern":
+        avg_patterns  = request.args.getlist("avg_patterns")
+        avg_notations = request.args.getlist("avg_notations")
+        shade_std     = request.args.get("shade_std", "true").lower() != "false"
+
+        if not avg_patterns:
+            return jsonify({"error": "No patterns provided for avg_by_pattern mode"}), 400
+        if len(avg_patterns) != len(avg_notations):
+            return jsonify({"error": "avg_patterns and avg_notations counts must match"}), 400
+
+        traces = []
+        for idx, (pattern, notation) in enumerate(zip(avg_patterns, avg_notations)):
+            color = PATTERN_COLORS[idx % len(PATTERN_COLORS)]
+            steps, means, stds = compute_avg_curve(summaries, pattern)
+            if not steps:
+                continue
+
+            if shade_std:
+                upper = [m + s for m, s in zip(means, stds)]
+                lower = [m - s for m, s in zip(means, stds)]
+                fill_color = hex_to_rgba(color, 0.15)
+                # Upper bound (invisible line — Plotly fills between this and next trace)
+                traces.append({
+                    "x": steps, "y": upper,
+                    "mode": "lines", "type": "scatter",
+                    "line": {"width": 0, "color": color},
+                    "showlegend": False, "hoverinfo": "skip",
+                    "name": f"_upper_{notation}",
+                })
+                # Lower bound with fill back to upper
+                traces.append({
+                    "x": steps, "y": lower,
+                    "mode": "lines", "type": "scatter",
+                    "fill": "tonexty", "fillcolor": fill_color,
+                    "line": {"width": 0, "color": color},
+                    "showlegend": False, "hoverinfo": "skip",
+                    "name": f"_lower_{notation}",
+                })
+
+            # Mean line
+            traces.append({
+                "x": steps, "y": means,
+                "mode": "lines+markers", "type": "scatter",
+                "name": notation,
+                "line": {"color": color, "width": 2},
+                "marker": {"color": color, "size": 5},
+                "hovertemplate": (
+                    f"<b>{notation}</b><br>"
+                    "Step: %{x}<br>"
+                    "Mean LLH: %{y:.4f}<extra></extra>"
+                ),
+            })
+
+        return jsonify({
+            "traces": traces,
+            "title": "Average Log-Likelihood by Pattern",
+            "xlabel": "Training Step",
+            "ylabel": "Average Log-Likelihood",
+        })
+
     return jsonify({"error": "Invalid plot_type"}), 400
 
 
@@ -490,6 +593,27 @@ HTML_PAGE = r"""<!DOCTYPE html>
   /* Legend color dot helper */
   .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
 
+  /* Pattern rows */
+  .pattern-row {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 6px;
+    align-items: center;
+  }
+  .pattern-row input[type=text] { flex: 1; font-size: .76rem; padding: 5px 8px; }
+  .remove-row-btn {
+    flex-shrink: 0;
+    width: 24px; height: 24px;
+    background: #3b1212;
+    border: 1px solid #6b2020;
+    border-radius: 5px;
+    color: #f87171;
+    font-size: .75rem;
+    cursor: pointer;
+    line-height: 1;
+  }
+  .remove-row-btn:hover { background: #6b2020; }
+
   /* Scrollbar */
   ::-webkit-scrollbar { width: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
@@ -523,6 +647,7 @@ HTML_PAGE = r"""<!DOCTYPE html>
         <button data-val="llh" class="active">Log-Likelihood</button>
         <button data-val="perplexity">Perplexity</button>
         <button data-val="questions">By Question</button>
+        <button data-val="avg_by_pattern">Avg by Pattern</button>
       </div>
     </div>
 
@@ -545,6 +670,17 @@ HTML_PAGE = r"""<!DOCTYPE html>
 
       <label class="field-label">ID Patterns (space-separated glob, e.g. id_9* id_4*)</label>
       <input type="text" id="filter-patterns" placeholder="leave blank for all">
+    </div>
+
+    <!-- Pattern Groups (avg_by_pattern mode only) -->
+    <div class="section" id="pattern-section" style="display:none">
+      <div class="section-title">Pattern Groups</div>
+      <div id="pattern-rows"></div>
+      <button id="add-pattern-btn" style="width:100%;padding:6px;background:#252840;border:1px dashed #2d3148;border-radius:6px;color:#64748b;font-size:.78rem;cursor:pointer;margin-top:4px;">+ Add Pattern</button>
+      <label style="display:flex;align-items:center;gap:6px;margin-top:10px;font-size:.78rem;color:#94a3b8;cursor:pointer">
+        <input type="checkbox" id="shade-std-cb" checked>
+        Show ±1 std shading
+      </label>
     </div>
 
     <!-- Apply -->
@@ -671,6 +807,46 @@ function updateColorLegend() {
 }
 
 // ============================================================
+// Pattern rows (avg_by_pattern mode)
+// ============================================================
+function addPatternRow(patternVal = "", notationVal = "") {
+  const container = document.getElementById("pattern-rows");
+  const row = document.createElement("div");
+  row.className = "pattern-row";
+  row.innerHTML = `
+    <input type="text" class="pat-glob" placeholder="id_1*" value="${patternVal}">
+    <input type="text" class="pat-label" placeholder="Label" value="${notationVal}">
+    <button class="remove-row-btn" title="Remove">✕</button>
+  `;
+  row.querySelector(".remove-row-btn").addEventListener("click", () => row.remove());
+  container.appendChild(row);
+}
+
+function collectPatternRows() {
+  const rows = document.querySelectorAll("#pattern-rows .pattern-row");
+  const patterns  = [];
+  const notations = [];
+  rows.forEach(row => {
+    const glob  = row.querySelector(".pat-glob").value.trim();
+    const label = row.querySelector(".pat-label").value.trim();
+    if (glob) {
+      patterns.push(glob);
+      notations.push(label || glob);
+    }
+  });
+  return { patterns, notations };
+}
+
+function togglePatternSection() {
+  const show = state.plotType === "avg_by_pattern";
+  document.getElementById("pattern-section").style.display = show ? "" : "none";
+  // Seed one empty row if none exist
+  if (show && document.querySelectorAll("#pattern-rows .pattern-row").length === 0) {
+    addPatternRow();
+  }
+}
+
+// ============================================================
 // Main fetch + render
 // ============================================================
 async function fetchAndRender() {
@@ -692,6 +868,19 @@ async function fetchAndRender() {
   params.set("color_by",  state.colorBy);
   if (questions) params.set("questions", questions);
   patterns.forEach(p => params.append("id_patterns", p));
+
+  if (state.plotType === "avg_by_pattern") {
+    const { patterns: avgPats, notations: avgNots } = collectPatternRows();
+    if (avgPats.length === 0) {
+      showError("Add at least one pattern in the Pattern Groups section.");
+      setLoading(false);
+      return;
+    }
+    avgPats.forEach(p => params.append("avg_patterns", p));
+    avgNots.forEach(n => params.append("avg_notations", n));
+    const shadeStd = document.getElementById("shade-std-cb").checked;
+    params.set("shade_std", shadeStd ? "true" : "false");
+  }
 
   try {
     const resp = await fetch(`/api/data?${params}`);
@@ -747,6 +936,7 @@ function bindBtnGroup(groupId, stateKey) {
       btn.classList.add("active");
       state[stateKey] = btn.dataset.val;
       if (stateKey === "colorBy") updateColorLegend();
+      if (stateKey === "plotType") togglePatternSection();
     });
   });
 }
@@ -759,6 +949,7 @@ document.addEventListener("DOMContentLoaded", () => {
   bindBtnGroup("color-group",     "colorBy");
 
   document.getElementById("apply-btn").addEventListener("click", fetchAndRender);
+  document.getElementById("add-pattern-btn").addEventListener("click", () => addPatternRow());
 
   // Allow Enter key in filter inputs
   ["filter-questions","filter-patterns"].forEach(id => {
@@ -783,7 +974,7 @@ document.addEventListener("DOMContentLoaded", () => {
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("--port", type=int, default=5000)
+    parser.add_argument("--port", type=int, default=8080)
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--results-dir", type=str, default=None,
                         help="Override path to prob_tracking/results/ directory")

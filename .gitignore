@@ -23,6 +23,7 @@ images/
 # Data files
 **.csv
 **.pkl
+**.jsonl
 data/**.json
 !data/math12K_7B_solutions.json
 *.csv
