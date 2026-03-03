@@ -24,11 +24,12 @@ images/
 **.csv
 **.pkl
 **.jsonl
-data/**.json
+data/**/*.json
+data/*.json
 !data/math12K_7B_solutions.json
 *.csv
 *.zip
 *.sh
-!data/math12K_teacher_answers*.json
+!train_script/*.sh
 models/
 saves/
