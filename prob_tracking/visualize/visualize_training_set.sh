@@ -19,17 +19,17 @@ mkdir -p prob_tracking/image/track_training_set/low_1.5B/Q${Q}/multiple_attribut
 python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/train_high_1.5B_all_checkpoints_summary.json prob_tracking/results/track_push_down_1.5B_high.json --questions ${Q} --output_dir prob_tracking/image/track_training_set/high_1.5B/Q${Q}/raw --no_show
 python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/train_low_1.5B_all_checkpoints_summary.json prob_tracking/results/track_push_down_1.5B_low.json --questions ${Q} --output_dir prob_tracking/image/track_training_set/low_1.5B/Q${Q}/raw --no_show
 
-#### Color by correctness ###
-python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/train_high_1.5B_all_checkpoints_summary.json prob_tracking/results/track_push_down_1.5B_high.json --questions ${Q} --output_dir prob_tracking/image/track_training_set/high_1.5B/Q${Q}/correctness --color_by_correctness --no_show
-python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/train_low_1.5B_all_checkpoints_summary.json prob_tracking/results/track_push_down_1.5B_low.json --questions ${Q} --output_dir prob_tracking/image/track_training_set/low_1.5B/Q${Q}/correctness --color_by_correctness --no_show
+# #### Color by correctness ###
+# python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/train_high_1.5B_all_checkpoints_summary.json prob_tracking/results/track_push_down_1.5B_high.json --questions ${Q} --output_dir prob_tracking/image/track_training_set/high_1.5B/Q${Q}/correctness --color_by_correctness --no_show
+# python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/train_low_1.5B_all_checkpoints_summary.json prob_tracking/results/track_push_down_1.5B_low.json --questions ${Q} --output_dir prob_tracking/image/track_training_set/low_1.5B/Q${Q}/correctness --color_by_correctness --no_show
 
-### Color by source ###
-python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/train_high_1.5B_all_checkpoints_summary.json prob_tracking/results/track_push_down_1.5B_high.json --questions ${Q} --output_dir prob_tracking/image/track_training_set/high_1.5B/Q${Q}/source --color_by_source --no_show
-python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/train_low_1.5B_all_checkpoints_summary.json prob_tracking/results/track_push_down_1.5B_low.json --questions ${Q} --output_dir prob_tracking/image/track_training_set/low_1.5B/Q${Q}/source --color_by_source --no_show
+# ### Color by source ###
+# python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/train_high_1.5B_all_checkpoints_summary.json prob_tracking/results/track_push_down_1.5B_high.json --questions ${Q} --output_dir prob_tracking/image/track_training_set/high_1.5B/Q${Q}/source --color_by_source --no_show
+# python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/train_low_1.5B_all_checkpoints_summary.json prob_tracking/results/track_push_down_1.5B_low.json --questions ${Q} --output_dir prob_tracking/image/track_training_set/low_1.5B/Q${Q}/source --color_by_source --no_show
 
-### Color by multiple attributes ###
-python prob_tracking/visualize/visualize_multi_factor.py --summary_path prob_tracking/results/train_high_1.5B_all_checkpoints_summary.json prob_tracking/results/track_push_down_1.5B_high.json --questions ${Q} --output_dir prob_tracking/image/track_training_set/high_1.5B/Q${Q}/multiple_attributes
-python prob_tracking/visualize/visualize_multi_factor.py --summary_path prob_tracking/results/train_low_1.5B_all_checkpoints_summary.json prob_tracking/results/track_push_down_1.5B_low.json --questions ${Q} --output_dir prob_tracking/image/track_training_set/low_1.5B/Q${Q}/multiple_attributes
+# ### Color by multiple attributes ###
+# python prob_tracking/visualize/visualize_multi_factor.py --summary_path prob_tracking/results/train_high_1.5B_all_checkpoints_summary.json prob_tracking/results/track_push_down_1.5B_high.json --questions ${Q} --output_dir prob_tracking/image/track_training_set/high_1.5B/Q${Q}/multiple_attributes
+# python prob_tracking/visualize/visualize_multi_factor.py --summary_path prob_tracking/results/train_low_1.5B_all_checkpoints_summary.json prob_tracking/results/track_push_down_1.5B_low.json --questions ${Q} --output_dir prob_tracking/image/track_training_set/low_1.5B/Q${Q}/multiple_attributes
 
 done
 
@@ -51,17 +51,17 @@ mkdir -p prob_tracking/image/track_training_set/low_3B/Q${Q}/multiple_attributes
 python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/train_high_3B_all_checkpoints_summary.json prob_tracking/results/track_push_down_3B_high.json --questions ${Q} --output_dir prob_tracking/image/track_training_set/high_3B/Q${Q}/raw --no_show
 python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/train_low_3B_all_checkpoints_summary.json prob_tracking/results/track_push_down_3B_low.json --questions ${Q} --output_dir prob_tracking/image/track_training_set/low_3B/Q${Q}/raw --no_show
 
-### Color by correctness ###
-python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/train_high_3B_all_checkpoints_summary.json prob_tracking/results/track_push_down_3B_high.json --questions ${Q} --output_dir prob_tracking/image/track_training_set/high_3B/Q${Q}/correctness --color_by_correctness --no_show
-python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/train_low_3B_all_checkpoints_summary.json prob_tracking/results/track_push_down_3B_low.json --questions ${Q} --output_dir prob_tracking/image/track_training_set/low_3B/Q${Q}/correctness --color_by_correctness --no_show
+# ### Color by correctness ###
+# python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/train_high_3B_all_checkpoints_summary.json prob_tracking/results/track_push_down_3B_high.json --questions ${Q} --output_dir prob_tracking/image/track_training_set/high_3B/Q${Q}/correctness --color_by_correctness --no_show
+# python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/train_low_3B_all_checkpoints_summary.json prob_tracking/results/track_push_down_3B_low.json --questions ${Q} --output_dir prob_tracking/image/track_training_set/low_3B/Q${Q}/correctness --color_by_correctness --no_show
 
-### Color by source ###
-python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/train_high_3B_all_checkpoints_summary.json prob_tracking/results/track_push_down_3B_high.json --questions ${Q} --output_dir prob_tracking/image/track_training_set/high_3B/Q${Q}/source --color_by_source --no_show
-python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/train_low_3B_all_checkpoints_summary.json prob_tracking/results/track_push_down_3B_low.json --questions ${Q} --output_dir prob_tracking/image/track_training_set/low_3B/Q${Q}/source --color_by_source --no_show
+# ### Color by source ###
+# python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/train_high_3B_all_checkpoints_summary.json prob_tracking/results/track_push_down_3B_high.json --questions ${Q} --output_dir prob_tracking/image/track_training_set/high_3B/Q${Q}/source --color_by_source --no_show
+# python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/train_low_3B_all_checkpoints_summary.json prob_tracking/results/track_push_down_3B_low.json --questions ${Q} --output_dir prob_tracking/image/track_training_set/low_3B/Q${Q}/source --color_by_source --no_show
 
-### Color by multiple attributes ###
-python prob_tracking/visualize/visualize_multi_factor.py --summary_path prob_tracking/results/train_high_3B_all_checkpoints_summary.json prob_tracking/results/track_push_down_3B_high.json --questions ${Q} --output_dir prob_tracking/image/track_training_set/high_3B/Q${Q}/multiple_attributes
-python prob_tracking/visualize/visualize_multi_factor.py --summary_path prob_tracking/results/train_low_3B_all_checkpoints_summary.json prob_tracking/results/track_push_down_3B_low.json --questions ${Q} --output_dir prob_tracking/image/track_training_set/low_3B/Q${Q}/multiple_attributes
+# ### Color by multiple attributes ###
+# python prob_tracking/visualize/visualize_multi_factor.py --summary_path prob_tracking/results/train_high_3B_all_checkpoints_summary.json prob_tracking/results/track_push_down_3B_high.json --questions ${Q} --output_dir prob_tracking/image/track_training_set/high_3B/Q${Q}/multiple_attributes
+# python prob_tracking/visualize/visualize_multi_factor.py --summary_path prob_tracking/results/train_low_3B_all_checkpoints_summary.json prob_tracking/results/track_push_down_3B_low.json --questions ${Q} --output_dir prob_tracking/image/track_training_set/low_3B/Q${Q}/multiple_attributes
 
 done
 
@@ -83,16 +83,16 @@ mkdir -p prob_tracking/image/track_training_set/low_7B/Q${Q}/multiple_attributes
 python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/train_high_7B_all_checkpoints_summary.json prob_tracking/results/track_push_down_7B_high.json --questions ${Q} --output_dir prob_tracking/image/track_training_set/high_7B/Q${Q}/raw --no_show
 python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/train_low_7B_all_checkpoints_summary.json prob_tracking/results/track_push_down_7B_low.json --questions ${Q} --output_dir prob_tracking/image/track_training_set/low_7B/Q${Q}/raw --no_show
 
-### Color by correctness ###
-python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/train_high_7B_all_checkpoints_summary.json prob_tracking/results/track_push_down_7B_high.json --questions ${Q} --output_dir prob_tracking/image/track_training_set/high_7B/Q${Q}/correctness --color_by_correctness --no_show
-python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/train_low_7B_all_checkpoints_summary.json prob_tracking/results/track_push_down_7B_low.json --questions ${Q} --output_dir prob_tracking/image/track_training_set/low_7B/Q${Q}/correctness --color_by_correctness --no_show
+# ### Color by correctness ###
+# python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/train_high_7B_all_checkpoints_summary.json prob_tracking/results/track_push_down_7B_high.json --questions ${Q} --output_dir prob_tracking/image/track_training_set/high_7B/Q${Q}/correctness --color_by_correctness --no_show
+# python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/train_low_7B_all_checkpoints_summary.json prob_tracking/results/track_push_down_7B_low.json --questions ${Q} --output_dir prob_tracking/image/track_training_set/low_7B/Q${Q}/correctness --color_by_correctness --no_show
 
-### Color by source ###
-python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/train_high_7B_all_checkpoints_summary.json prob_tracking/results/track_push_down_7B_high.json --questions ${Q} --output_dir prob_tracking/image/track_training_set/high_7B/Q${Q}/source --color_by_source --no_show
-python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/train_low_7B_all_checkpoints_summary.json prob_tracking/results/track_push_down_7B_low.json --questions ${Q} --output_dir prob_tracking/image/track_training_set/low_7B/Q${Q}/source --color_by_source --no_show
+# ### Color by source ###
+# python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/train_high_7B_all_checkpoints_summary.json prob_tracking/results/track_push_down_7B_high.json --questions ${Q} --output_dir prob_tracking/image/track_training_set/high_7B/Q${Q}/source --color_by_source --no_show
+# python prob_tracking/visualize/visualize_llh_dynamics.py --summary_path prob_tracking/results/train_low_7B_all_checkpoints_summary.json prob_tracking/results/track_push_down_7B_low.json --questions ${Q} --output_dir prob_tracking/image/track_training_set/low_7B/Q${Q}/source --color_by_source --no_show
 
-### Color by multiple attributes ###
-python prob_tracking/visualize/visualize_multi_factor.py --summary_path prob_tracking/results/train_high_7B_all_checkpoints_summary.json prob_tracking/results/track_push_down_7B_high.json --questions ${Q} --output_dir prob_tracking/image/track_training_set/high_7B/Q${Q}/multiple_attributes
-python prob_tracking/visualize/visualize_multi_factor.py --summary_path prob_tracking/results/train_low_7B_all_checkpoints_summary.json prob_tracking/results/track_push_down_7B_low.json --questions ${Q} --output_dir prob_tracking/image/track_training_set/low_7B/Q${Q}/multiple_attributes
+# ### Color by multiple attributes ###
+# python prob_tracking/visualize/visualize_multi_factor.py --summary_path prob_tracking/results/train_high_7B_all_checkpoints_summary.json prob_tracking/results/track_push_down_7B_high.json --questions ${Q} --output_dir prob_tracking/image/track_training_set/high_7B/Q${Q}/multiple_attributes
+# python prob_tracking/visualize/visualize_multi_factor.py --summary_path prob_tracking/results/train_low_7B_all_checkpoints_summary.json prob_tracking/results/track_push_down_7B_low.json --questions ${Q} --output_dir prob_tracking/image/track_training_set/low_7B/Q${Q}/multiple_attributes
 
 done

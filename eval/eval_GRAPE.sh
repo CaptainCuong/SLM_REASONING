@@ -1,13 +1,13 @@
 #!/bin/bash
 
 # Base model directory
-base_model_dir="/projects/ai_safe/cuongdc/adaptive_7B_low/epoch_2" # No slash at the end
+base_model_dir="/helios-storage/helios4-data/cuong/model/adaptive_3B_low/epoch_1" # No slash at the end
 
 # Array of datasets to evaluate
-datasets=("math12k" "cn_math_2024" "gaokao" "grade_school_math" "kaoyan" "olympiadbench" "aime" "amc" "gpqa" "math" "minerva")
-datasets=("cn_math_2024" "gaokao" "grade_school_math" "kaoyan" "olympiadbench" "aime" "gpqa" "math" "minerva")
+datasets=("amc")
 # Create array of all model paths to evaluate (base model + all checkpoints)
-model_paths=("$base_model_dir")
+
+model_paths=()
 for checkpoint in "$base_model_dir"/checkpoint-*; do
     if [ -d "$checkpoint" ]; then
         model_paths+=("$checkpoint")
@@ -29,11 +29,11 @@ for model_path in "${model_paths[@]}"; do
         --model_name_or_path "$model_path" \
         --data_name "$data_name" \
         --prompt_type "qwen-instruct" \
-        --temperature 0.7 \
+        --temperature 0.6 \
         --start_idx 0 \
         --end_idx -1 \
-        --n_sampling 1 \
-        --k 1 \
+        --n_sampling 8 \
+        --k 8 \
         --split "test" \
         --max_tokens 32768 \
         --seed 0 \

@@ -3,7 +3,7 @@
 # Base model directory
 base_model_dir="/projects/ai_safe/cuongdc/Qwen_mix_high_self_0.75_7B" # No slash at the end
 # GPU management: 8 GPUs, 1 GPU per job
-NUM_GPUS=8
+NUM_GPUS=
 
 # Array of datasets to evaluate
 datasets=("cn_math_2024" "gaokao" "grade_school_math" "kaoyan" "olympiadbench" "aime" "gpqa" "math" "minerva")

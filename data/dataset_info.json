@@ -1,4 +1,22 @@
 {
+  "7B_high": {
+    "file_name": "7B/math12K_highest_llh.json"
+  },
+  "7B_low": {
+    "file_name": "7B/math12K_lowest_llh.json"
+  },
+  "3B_high": {
+    "file_name": "3B/math12K_highest_llh.json"
+  },
+  "3B_low": {
+    "file_name": "3B/math12K_lowest_llh.json"
+  },
+  "1.5B_high": {
+    "file_name": "1.5B/math12K_highest_llh.json"
+  },
+  "1.5B_low": {
+    "file_name": "1.5B/math12K_lowest_llh.json"
+  },
   "math12K_high_self_mixed": {
     "file_name": "math12K_high_self_mixed.json"
   },

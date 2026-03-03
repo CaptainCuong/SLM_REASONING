@@ -34,10 +34,41 @@ def match_patterns(keys: list, patterns: list) -> list:
     return [k for k in keys if any(fnmatch.fnmatch(k, p) for p in patterns)]
 
 
-def compute_curve(loaded: list, pattern: str) -> tuple[list, list, list]:
+def drop_outliers_iqr(vals: list, k: float = 1.5) -> list:
+    """Remove values outside [Q1 - k*IQR, Q3 + k*IQR]."""
+    if len(vals) < 4:
+        return vals
+    arr = np.array(vals)
+    q1, q3 = np.percentile(arr, 25), np.percentile(arr, 75)
+    iqr = q3 - q1
+    lo, hi = q1 - k * iqr, q3 + k * iqr
+    return [v for v in vals if lo <= v <= hi]
+
+
+def drop_outliers_zscore(vals: list, threshold: float = 3.0) -> list:
+    """Remove values more than `threshold` std-devs from the mean."""
+    if len(vals) < 4:
+        return vals
+    arr = np.array(vals)
+    mean, std = arr.mean(), arr.std()
+    if std == 0:
+        return vals
+    return [v for v in vals if abs(v - mean) <= threshold * std]
+
+
+def compute_curve(
+    loaded: list,
+    pattern: str,
+    outlier_iqr: float | None = None,
+    outlier_std: float | None = None,
+) -> tuple[list, list, list]:
     """
     For a single fnmatch pattern, compute per-step (mean, std) across all
     matching IDs in all loaded files.
+
+    Outlier removal is applied per step before averaging:
+      - outlier_iqr: drop values outside [Q1 - k*IQR, Q3 + k*IQR] (k=outlier_iqr)
+      - outlier_std: drop values more than N std-devs from the mean
 
     Returns (steps, means, stds).  Steps are taken from the first file.
     """
@@ -57,11 +88,18 @@ def compute_curve(loaded: list, pattern: str) -> tuple[list, list, list]:
 
     means, stds, valid_steps = [], [], []
     for step, vals in zip(reference_steps, values_per_step):
-        if vals:
-            arr = np.array(vals)
-            means.append(arr.mean())
-            stds.append(arr.std())
-            valid_steps.append(step)
+        if not vals:
+            continue
+        if outlier_iqr is not None:
+            vals = drop_outliers_iqr(vals, k=outlier_iqr)
+        elif outlier_std is not None:
+            vals = drop_outliers_zscore(vals, threshold=outlier_std)
+        if not vals:
+            continue
+        arr = np.array(vals)
+        means.append(arr.mean())
+        stds.append(arr.std())
+        valid_steps.append(step)
 
     return valid_steps, means, stds
 
@@ -156,6 +194,25 @@ def main():
         action="store_true",
         help="Do not display the plot interactively.",
     )
+
+    outlier_group = parser.add_mutually_exclusive_group()
+    outlier_group.add_argument(
+        "--outlier_iqr",
+        type=float, metavar="K", default=None,
+        help=(
+            "Drop per-step values outside [Q1 - K*IQR, Q3 + K*IQR] before averaging. "
+            "Typical value: 1.5."
+        ),
+    )
+    outlier_group.add_argument(
+        "--outlier_std",
+        type=float, metavar="N", default=None,
+        help=(
+            "Drop per-step values more than N std-devs from the step mean before averaging. "
+            "Typical value: 3.0."
+        ),
+    )
+
     args = parser.parse_args()
 
     if len(args.patterns) != len(args.notations):
@@ -163,6 +220,13 @@ def main():
             f"--patterns has {len(args.patterns)} entries but "
             f"--notations has {len(args.notations)}.  They must match."
         )
+
+    if args.outlier_iqr is not None:
+        print(f"Outlier removal: IQR method (k={args.outlier_iqr})")
+    elif args.outlier_std is not None:
+        print(f"Outlier removal: z-score method (threshold={args.outlier_std} std)")
+    else:
+        print("Outlier removal: disabled")
 
     # Load all files once
     loaded = []
@@ -173,7 +237,11 @@ def main():
     # Compute one curve per pattern
     curves = []
     for pattern, notation in zip(args.patterns, args.notations):
-        steps, means, stds = compute_curve(loaded, pattern)
+        steps, means, stds = compute_curve(
+            loaded, pattern,
+            outlier_iqr=args.outlier_iqr,
+            outlier_std=args.outlier_std,
+        )
         n_ids = sum(
             len(match_patterns(list(d.get("results_by_type", {}).keys()), [pattern]))
             for _, d in loaded

@@ -60,7 +60,7 @@ def stats(values: list) -> tuple:
     return mean, var, var ** 0.5
 
 
-def compute_at_step(files: list, patterns: list, step: int):
+def compute_at_step(files: list, patterns: list, step: int, verbose: bool = False):
     """
     Collect avg_log_likelihood values for all matched IDs at a single step.
     Returns (mean, variance, std_dev, all_values).
@@ -83,14 +83,17 @@ def compute_at_step(files: list, patterns: list, step: int):
             value = results[key]["avg_log_likelihood"][step_idx]
             if value is not None:
                 file_values.append(value)
-                print(f"  [{Path(filepath).name}] {key}: {value:.6f}")
+                if verbose:
+                    print(f"  [{Path(filepath).name}] {key}: {value:.6f}")
             else:
-                print(f"  [{Path(filepath).name}] {key}: None (skipped)")
+                if verbose:
+                    print(f"  [{Path(filepath).name}] {key}: None (skipped)")
 
         if file_values:
             fm, fv, fs = stats(file_values)
-            print(f"  [{Path(filepath).name}] file average ({len(file_values)} entries): "
-                  f"{fm:.6f}  var={fv:.6f}  std={fs:.6f}")
+            if verbose:
+                print(f"  [{Path(filepath).name}] file average ({len(file_values)} entries): "
+                      f"{fm:.6f}  var={fv:.6f}  std={fs:.6f}")
             all_values.extend(file_values)
 
     if not all_values:
@@ -160,6 +163,12 @@ def main():
         metavar="STEP",
         help="Training checkpoint step number (e.g. 1110). Omit to compute for all steps.",
     )
+    parser.add_argument(
+        "--verbose", "-v",
+        action="store_true",
+        default=False,
+        help="Show per-sample and per-file log lines (default: hidden).",
+    )
     args = parser.parse_args()
 
     print(f"\nFiles   : {args.files}")
@@ -167,7 +176,7 @@ def main():
     print(f"Step    : {args.step if args.step is not None else 'all'}\n")
 
     if args.step is not None:
-        mean, var, std, all_values = compute_at_step(args.files, args.patterns, args.step)
+        mean, var, std, all_values = compute_at_step(args.files, args.patterns, args.step, args.verbose)
         print(f"\n{'='*60}")
         print(f"Total matched entries : {len(all_values)}")
         print(f"Overall avg log-likelihood at step {args.step}: {mean:.6f}")

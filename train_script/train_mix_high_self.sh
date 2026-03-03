@@ -22,7 +22,7 @@ llamafactory-cli train \
     --output_dir $OUTPUT_DIR \
     --logging_steps 1 \
     --save_strategy steps \
-    --save_steps 1110 \
+    --save_steps 1100 \
     --plot_loss true \
     --overwrite_output_dir true \
     --per_device_train_batch_size 1 \

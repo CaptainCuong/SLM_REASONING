@@ -1,6 +1,6 @@
-CUDA_VISIBLE_DEVICES='0,1' \
+CUDA_VISIBLE_DEVICES='2,3' \
 python eval.py \
---model_name_or_path "/projects/ai_safe/cuongdc/Qwen_mix_high_self_0.75_7B/checkpoint-3330" \
+--model_name_or_path "/helios-storage/helios4-data/cuong/model/adaptive_7B_high/epoch_1/checkpoint-3330" \
 --data_name "amc" \
 --prompt_type "qwen-instruct" \
 --temperature 0.0 \
@@ -11,5 +11,6 @@ python eval.py \
 --split "test" \
 --max_tokens 32768 \
 --seed 0 \
---top_p 1.0 \
+--top_p 0.9 \
 --surround_with_messages \
+--output_dir /helios-storage/helios4-data/cuong/data_storage/learning_dynamics/eval

@@ -94,13 +94,15 @@ def select_answers_by_field(
         lowest_data.append({
             "instruction": instruction,
             "input": question,
-            "output": lowest_answer['answer']
+            "output": lowest_answer['answer'],
+            "source": lowest_answer.get('source')
         })
 
         highest_data.append({
             "instruction": instruction,
             "input": question,
-            "output": highest_answer['answer']
+            "output": highest_answer['answer'],
+            "source": highest_answer.get('source')
         })
 
         stats['processed'] += 1
@@ -149,11 +151,13 @@ def select_answers_by_field(
         print(f"  Instruction: {sample['instruction']}")
         print(f"  Input: {sample['input'][:100]}...")
         print(f"  Output: {sample['output'][:100]}...")
+        print(f"  Source: {sample['source']}")
 
         print(f"\nHighest {field_name} sample:")
         sample = highest_data[0]
         print(f"  Input: {sample['input'][:100]}...")
         print(f"  Output: {sample['output'][:100]}...")
+        print(f"  Source: {sample['source']}")
 
     print("\n" + "=" * 80)
     print("COMPLETE")
