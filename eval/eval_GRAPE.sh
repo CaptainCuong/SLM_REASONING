@@ -1,10 +1,12 @@
 #!/bin/bash
 
 # Base model directory
-base_model_dir="/helios-storage/helios4-data/cuong/model/adaptive_3B_low/epoch_1" # No slash at the end
+base_model_dir="/helios-storage/helios4-data/cuong/model/Qwen_Math_low_7B" # No slash at the end
 
 # Array of datasets to evaluate
-datasets=("amc")
+datasets=("math12k" "cn_math_2024" "gaokao" "grade_school_math" "kaoyan" "olympiadbench" "aime" "amc" "gpqa" "math" "minerva")
+datasets=("cn_math_2024" "gaokao" "grade_school_math" "kaoyan" "aime" "gpqa" "math" "minerva")
+datasets=("amc" "kaoyan" "olympiadbench")
 # Create array of all model paths to evaluate (base model + all checkpoints)
 
 model_paths=()
@@ -24,7 +26,7 @@ for model_path in "${model_paths[@]}"; do
     for data_name in "${datasets[@]}"; do
         echo "Running evaluation for dataset: $data_name"
 
-        CUDA_VISIBLE_DEVICES='0,1' \
+        CUDA_VISIBLE_DEVICES='0,1,2,3' \
         python eval.py \
         --model_name_or_path "$model_path" \
         --data_name "$data_name" \
@@ -38,8 +40,7 @@ for model_path in "${model_paths[@]}"; do
         --max_tokens 32768 \
         --seed 0 \
         --top_p 0.9 \
-        --surround_with_messages \
-        --output_dir "./outputs/adaptive_7B_low" \
+        --surround_with_messages 
 
         echo "Completed evaluation for $data_name on $model_path"
         echo "------------------------------------------"
