@@ -329,7 +329,7 @@ def main():
     parser.add_argument(
         "--temp",
         type=str,
-        default=None,
+        default="0.6",
         help="Temperature filter for file selection (e.g. 0 → *_t0.0_*.jsonl, 0.6 → *_t0.6_*.jsonl). "
              "If not set, all JSONL files are used."
     )
