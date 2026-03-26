@@ -194,8 +194,8 @@ def main():
     parser.add_argument(
         "--temperature",
         type=float,
-        default=0,
-        help="Sampling temperature (default: 0.7, use 0 for greedy)"
+        default=0.6,
+        help="Sampling temperature (default: 0.6, use 0 for greedy)"
     )
     parser.add_argument(
         "--max_tokens",
@@ -218,7 +218,7 @@ def main():
     parser.add_argument(
         "--p",
         type=float,
-        default=1.0,
+        default=0.9,
         help="Top-p (nucleus sampling) parameter (default: 0.9)"
     )
     parser.add_argument(

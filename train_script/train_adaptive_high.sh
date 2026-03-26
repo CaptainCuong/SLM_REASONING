@@ -1,4 +1,4 @@
-GPUS=2,3
+GPUS=0,1
 MODEL_SIZE=7B
 NUM_EPOCHS=5
 OUTPUT_DIR=/helios-storage/helios4-data/cuong/model/adaptive_${MODEL_SIZE}_high

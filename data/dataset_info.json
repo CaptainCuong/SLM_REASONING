@@ -824,5 +824,29 @@
       "prompt": "content"
     },
     "folder": "python"
+  },
+  "Qwen3-8B_high": {
+    "file_name": "Qwen3-8B/math12K_highest_llh.json"
+  },
+  "Qwen3-8B_low": {
+    "file_name": "Qwen3-8B/math12K_lowest_llh.json"
+  },
+  "Llama-3.1-8B-Instruct_high": {
+    "file_name": "Llama-3.1-8B-Instruct/math12K_highest_llh.json"
+  },
+  "Llama-3.1-8B-Instruct_low": {
+    "file_name": "Llama-3.1-8B-Instruct/math12K_lowest_llh.json"
+  },
+  "Llama-3.2-3B-Instruct_high": {
+    "file_name": "Llama-3.2-3B-Instruct/math12K_highest_llh.json"
+  },
+  "Llama-3.2-3B-Instruct_low": {
+    "file_name": "Llama-3.2-3B-Instruct/math12K_lowest_llh.json"
+  },
+  "Qwen3-8B_low_high": {
+    "file_name": "Qwen3-8B_low/math12K_highest_llh.json"
+  },
+  "Qwen3-8B_low_low": {
+    "file_name": "Qwen3-8B_low/math12K_lowest_llh.json"
   }
 }

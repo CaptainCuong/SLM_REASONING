@@ -1,8 +1,8 @@
 GPUS=0,1
-MODEL_SIZE=3B
-NUM_EPOCHS=15
+MODEL_SIZE=7B
+NUM_EPOCHS=6
 START_EPOCH=1
-OUTPUT_DIR=/helios-storage/helios4-data/cuong/model/adaptive_${MODEL_SIZE}_low
+OUTPUT_DIR=/projects/ai_safe/cuongdc/adaptive_${MODEL_SIZE}_low
 mkdir -p $OUTPUT_DIR
 mkdir -p data/$MODEL_SIZE
 

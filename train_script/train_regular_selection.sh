@@ -1,8 +1,8 @@
 GPUS=0,1
 NUM_EPOCHS=5
-MODEL_NAME="Qwen/Qwen3-8B"
+MODEL_NAME="Qwen/Qwen3.5-4B"
 LR=1.25e-6
-MODE="low" # "high" or "low" or "both"
+MODE="both" # "high" or "low" or "both"
 DATA_FOLDER=data/$(basename $MODEL_NAME)
 mkdir -p $DATA_FOLDER
 
@@ -56,7 +56,21 @@ python data/data_processing_utils/select_math12k_answers_by_field.py \
 
 rm $DATA_FOLDER/math12K_likelihood_part*.json
 
-
+# Register datasets in dataset_info.json
+MODEL_BASE=$(basename $MODEL_NAME)
+DATASET_HIGH="${MODEL_BASE}_high"
+DATASET_LOW="${MODEL_BASE}_low"
+python3 -c "
+import json
+with open('data/dataset_info.json', 'r') as f:
+    info = json.load(f)
+if '${DATASET_HIGH}' not in info:
+    info['${DATASET_HIGH}'] = {'file_name': '${MODEL_BASE}/math12K_highest_llh.json'}
+if '${DATASET_LOW}' not in info:
+    info['${DATASET_LOW}'] = {'file_name': '${MODEL_BASE}/math12K_lowest_llh.json'}
+with open('data/dataset_info.json', 'w') as f:
+    json.dump(info, f, indent=2)
+"
 
 train() {
     local DATASET=$1
@@ -96,12 +110,12 @@ OUTPUT_DIR_LOW=/projects/ai_safe/cuongdc/$(basename $MODEL_NAME)_low
 OUTPUT_DIR_HIGH=/projects/ai_safe/cuongdc/$(basename $MODEL_NAME)_high
 
 if [ "$MODE" == "high" ]; then
-    train $DATA_FOLDER/math12K_highest_llh.json $OUTPUT_DIR_HIGH
+    train $DATASET_HIGH $OUTPUT_DIR_HIGH
 elif [ "$MODE" == "low" ]; then
-    train $DATA_FOLDER/math12K_lowest_llh.json $OUTPUT_DIR_LOW
+    train $DATASET_LOW $OUTPUT_DIR_LOW
 elif [ "$MODE" == "both" ]; then
-    train $DATA_FOLDER/math12K_highest_llh.json $OUTPUT_DIR_HIGH
-    train $DATA_FOLDER/math12K_lowest_llh.json $OUTPUT_DIR_LOW
+    train $DATASET_HIGH $OUTPUT_DIR_HIGH
+    train $DATASET_LOW $OUTPUT_DIR_LOW
 else
     echo "Invalid MODE: $MODE. Must be 'high', 'low', or 'both'."
     exit 1

@@ -1,31 +1,40 @@
 #!/bin/bash
 
 # Base model directory
-base_model_dir="/projects/ai_safe/cuongdc/Qwen_Math_high_3B" # No slash at the end
-base_model_dir="Qwen/Qwen3-4B" # No slash at the end
+base_model_dir="/projects/ai_safe/cuongdc/gemma-3-4b-it_high" # No slash at the end
+base_model_dir="/projects/ai_safe/cuongdc/gemma-3-4b-it_low" # No slash at the end
+base_model_dir="/projects/ai_safe/cuongdc/Llama-3.2-3B-Instruct_high" # No slash at the end
+base_model_dir="/projects/ai_safe/cuongdc/Qwen3-8B_high" # No slash at the end # tc-gpu004
+base_model_dir="/projects/ai_safe/cuongdc/Llama-3.1-8B-Instruct_low" # No slash at the end
+base_model_dir="/projects/ai_safe/cuongdc/Llama-3.1-8B-Instruct_high" # No slash at the end
+base_model_dir="/projects/ai_safe/cuongdc/Llama-3.2-3B-Instruct_low" # No slash at the end
+base_model_dir="/projects/ai_safe/cuongdc/Qwen3-8B_low" # No slash at the end # tc-gpu004
 
 # Array of datasets to evaluate
 datasets=("math12k" "gaokao" "grade_school_math" "kaoyan" "aime" "gpqa" "math" "minerva")
-datasets=("math12k" "cn_math_2024" "gaokao" "grade_school_math" "kaoyan" "olympiadbench" "aime" "amc" "gpqa" "math" "minerva")
-datasets=("cn_math_2024" "gaokao" "grade_school_math" "kaoyan" "olympiadbench" "aime" "amc" "gpqa" "math" "minerva")
-# Create array of all model paths to evaluate (base model + all checkpoints)
+datasets=("olympiadbench" "aime" "amc" "gpqa" "cn_math_2024" "gaokao" "grade_school_math" "kaoyan" "math" "minerva")
+datasets=("aime" "cn_math_2024" "amc" "gaokao" "gpqa")
+datasets=("grade_school_math" "kaoyan")
+datasets=("amc" "gaokao")
+datasets=("minerva")
 
-model_paths=("$base_model_dir")
+# Create array of all model paths to evaluate (base model + all checkpoints)
+model_paths=()
 for checkpoint in "$base_model_dir"/checkpoint-*; do
     if [ -d "$checkpoint" ]; then
         model_paths+=("$checkpoint")
     fi
 done
 
-# Loop through all model paths
-for model_path in "${model_paths[@]}"; do
-    echo "=========================================="
-    echo "Evaluating model: $model_path"
-    echo "=========================================="
+# Loop through all datasets
+for data_name in "${datasets[@]}"; do
+    echo "Running evaluation for dataset: $data_name"
 
-    # Loop through all datasets
-    for data_name in "${datasets[@]}"; do
-        echo "Running evaluation for dataset: $data_name"
+    # Loop through all model paths
+    for model_path in "${model_paths[@]}"; do
+        echo "=========================================="
+        echo "Evaluating model: $model_path"
+        echo "=========================================="
 
         CUDA_VISIBLE_DEVICES='0,1' \
         python eval.py \
